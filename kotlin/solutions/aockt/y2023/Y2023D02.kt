@@ -31,7 +31,7 @@ object Y2023D02 : Solution {
     }
 
     private fun parseInput(input: String): List<Game> =
-        input.split('\n').map(::parseGameLine)
+        input.lineSequence().map(::parseGameLine).toList()
 
     private fun getMinimumCounts(grabs: List<Grab>) : Map<Color, Int> {
         val counts = mutableMapOf(RED to 0, GREEN to 0, BLUE to 0)

@@ -19,13 +19,9 @@ private fun String.extractCalibrationValue() =
     10 * find { it.isDigit() }!!.digitToInt() + findLast { it.isDigit() }!!.digitToInt()
 
 object Y2023D01 : Solution {
-
-    private fun parseInput(input: String): List<String> =
-        input.split('\n')
-
     override fun partOne(input: String) =
-        parseInput(input).map(String::extractCalibrationValue).sum()
+        input.lineSequence().sumOf(String::extractCalibrationValue)
 
     override fun partTwo(input: String) =
-        parseInput(input).map(String::replaceSpelledDigits).map(String::extractCalibrationValue).sum()
+        input.lineSequence().map(String::replaceSpelledDigits).sumOf(String::extractCalibrationValue)
 }
