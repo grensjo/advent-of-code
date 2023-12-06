@@ -1,5 +1,6 @@
 package aockt.y2023
 
+import aockt.y2023.Color.*
 import io.github.jadarma.aockt.core.Solution
 import java.lang.IllegalArgumentException
 import kotlin.math.max
@@ -7,7 +8,6 @@ import kotlin.math.max
 private enum class Color { RED, GREEN, BLUE }
 private data class Grab(val color: Color, val amount: Int)
 private data class Game(val id: Int, val grabs: List<Grab>)
-private data class Counts(val red: Int, val green: Int, val blue: Int)
 
 object Y2023D02 : Solution {
 
@@ -17,9 +17,9 @@ object Y2023D02 : Solution {
         val parts = grabString.trim().split(' ')
         assert(parts.size == 2)
         val color = when(parts[1]) {
-            "red" -> Color.RED
-            "green" -> Color.GREEN
-            "blue" -> Color.BLUE
+            "red" -> RED
+            "green" -> GREEN
+            "blue" -> BLUE
             else -> throw IllegalArgumentException()
         }
         return Grab(color, parts[0].toInt())
@@ -33,23 +33,21 @@ object Y2023D02 : Solution {
     private fun parseInput(input: String): List<Game> =
         input.split('\n').map(::parseGameLine)
 
-    private fun getMinimumCounts(grabs: List<Grab>) : Counts {
-        var red = 0
-        var green = 0
-        var blue = 0
+    private fun getMinimumCounts(grabs: List<Grab>) : Map<Color, Int> {
+        val counts = mutableMapOf(RED to 0, GREEN to 0, BLUE to 0)
         for (grab in grabs) {
-            if (grab.color == Color.RED) red = max(red, grab.amount)
-            if (grab.color == Color.GREEN) green = max(green, grab.amount)
-            if (grab.color == Color.BLUE) blue = max(blue, grab.amount)
+            counts[grab.color] = max(counts.getValue(grab.color), grab.amount)
         }
-        return Counts(red, green, blue)
+        return counts
     }
 
     override fun partOne(input: String) : Int {
         var sum = 0
         for (game in parseInput(input)) {
             val minCounts = getMinimumCounts(game.grabs)
-            if (minCounts.red <= 12 && minCounts.green <= 13 && minCounts.blue <= 14) sum += game.id
+            if (minCounts.getValue(RED) <= 12 && minCounts.getValue(GREEN) <= 13 && minCounts.getValue(BLUE) <= 14) {
+                sum += game.id
+            }
         }
         return sum
     }
@@ -58,7 +56,7 @@ object Y2023D02 : Solution {
         var sum = 0
         for (game in parseInput(input)) {
             val minCounts = getMinimumCounts(game.grabs)
-            sum += minCounts.red  * minCounts.green * minCounts.blue
+            sum += minCounts.getValue(RED) * minCounts.getValue(GREEN) * minCounts.getValue(BLUE)
         }
         return sum
     }
