@@ -29,7 +29,7 @@ private data class Hand(val cards: List<Int>) : Comparable<Hand> {
         get() {
             val cardsWithoutJokers = cards.filterNot { it == 1 }.ifEmpty { listOf(1, 1, 1, 1, 1) }
             val numJokers = 5 - cardsWithoutJokers.size
-            val counts =
+            val counts: List<Int> =
                 cardsWithoutJokers
                     .groupingBy { it }
                     .eachCount() // Get a Map<Int, Int> of card value -> count.
