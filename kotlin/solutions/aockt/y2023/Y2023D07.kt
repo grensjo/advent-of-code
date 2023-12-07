@@ -15,10 +15,14 @@ private fun strToIntList(str: String, withJokerRule: Boolean) =
         }
     }
 
-infix fun List<Int>.compareTo(other: List<Int>) =
-    zip(other).map { (a, b) -> a compareTo b }.find { it != 0 } ?: 0
+// Lexicographical comparison of two int lists of equal length.
+private infix fun List<Int>.compareTo(other: List<Int>) =
+    zip(other)
+        .map { (a, b) -> a compareTo b } // Get a list of element-wise compareTo() results between the lists.
+        .find { it != 0 } // Compare the first element where the lists differ, returns null if they are equal.
+        ?: 0 // Default to 0 if no differing element was found.
 
-data class Hand(val cards: List<Int>) : Comparable<Hand> {
+private data class Hand(val cards: List<Int>) : Comparable<Hand> {
     constructor(str: String, withJokerRule: Boolean) : this(strToIntList(str, withJokerRule))
 
     private val typeStrength : Int
@@ -28,8 +32,8 @@ data class Hand(val cards: List<Int>) : Comparable<Hand> {
             val counts =
                 cardsWithoutJokers
                     .groupingBy { it }
-                    .eachCount()
-                    .values
+                    .eachCount() // Get a Map<Int, Int> of card value -> count.
+                    .values      // Extract just a list of the counts
                     .sortedDescending()
                     .mapIndexed { // Treat the jokers as the currently most common card
                             index, count -> if (index == 0) count + numJokers else count
@@ -47,6 +51,7 @@ data class Hand(val cards: List<Int>) : Comparable<Hand> {
         }
 
     override infix fun compareTo(other: Hand) : Int =
+        // Compare typeStrength. As tiebreaker, compare the lists lexicographically.
         when (val typeStrengthComparison = typeStrength compareTo other.typeStrength) {
             0 -> cards compareTo other.cards
             else -> typeStrengthComparison
@@ -58,7 +63,7 @@ private fun strToBid(str: String, withJokerRule: Boolean) =
         Bid(Hand(it[0], withJokerRule), it[1].toInt())
     }
 
-data class Bid(val hand: Hand, val bid: Int) : Comparable<Bid> {
+private data class Bid(val hand: Hand, val bid: Int) : Comparable<Bid> {
     override infix fun compareTo(other: Bid) =
         hand compareTo other.hand
 }
