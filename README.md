@@ -11,3 +11,4 @@
 | 04  |          [Scratchcards](https://adventofcode.com/2023/day/4)           | Part [one](python/2023/4a.py), [two](python/2023/4b.py) |                         n/a                          |
 | 05  | [If You Give A Seed A Fertilizer](https://adventofcode.com/2023/day/5) | Part [one](python/2023/5a.py), [two](python/2023/5b.py) |                         n/a                          |
 | 06  |           [Wait For It](https://adventofcode.com/2023/day/6)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D06.kt) |
+| 07  |           [Camel Cards](https://adventofcode.com/2023/day/6)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D07.kt) |
