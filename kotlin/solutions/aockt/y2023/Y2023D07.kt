@@ -33,9 +33,9 @@ private data class Hand(val cards: List<Int>) : Comparable<Hand> {
                 cardsWithoutJokers
                     .groupingBy { it }
                     .eachCount() // Get a Map<Int, Int> of card value -> count.
-                    .values      // Extract just a list of the counts
+                    .values      // Extract just a list of the counts.
                     .sortedDescending()
-                    .mapIndexed { // Treat the jokers as the currently most common card
+                    .mapIndexed { // Let the jokers act as the most common card.
                             index, count -> if (index == 0) count + numJokers else count
                     }.sortedDescending()
             return when (counts) {
