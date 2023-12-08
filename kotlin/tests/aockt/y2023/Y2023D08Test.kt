@@ -2,6 +2,7 @@ package aockt.y2023
 
 import io.github.jadarma.aockt.test.AdventDay
 import io.github.jadarma.aockt.test.AdventSpec
+import java.math.BigInteger
 
 @AdventDay(2023, 8, "Haunted Wasteland")
 class Y2023D08Test : AdventSpec<Y2023D08>({
@@ -43,7 +44,7 @@ class Y2023D08Test : AdventSpec<Y2023D08>({
             22C = (22Z, 22Z)
             22Z = (22B, 22B)
             XXX = (XXX, XXX)
-        """.trimIndent() shouldOutput 6
+        """.trimIndent() shouldOutput BigInteger.valueOf(6)
     }
 
 })

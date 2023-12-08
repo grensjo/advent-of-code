@@ -3,6 +3,9 @@ package aockt.y2023
 import io.github.jadarma.aockt.core.Solution
 import java.lang.IllegalArgumentException
 import java.math.BigInteger
+import java.math.BigInteger.ONE
+import java.math.BigInteger.ZERO
+import java.math.BigInteger.valueOf
 
 private data class Node(val label: String, val edges: List<String>)
 
@@ -52,31 +55,37 @@ object Y2023D08 : Solution {
         }.count()
     }
 
-    private fun getCandidateSteps(startNode: String, path: List<Int>, nodeMap: Map<String, Node>): Long {
-        var numSteps = 0L
-        var idx: Int = 0
-        val candidates: MutableList<Long> = mutableListOf()
-        val visited: MutableSet<Pair<String, Int>> = mutableSetOf()
+    private data class State(val node: String, val pathIdx: Int)
 
-        generateSequence(startNode) {currentNode ->
-            visited.add(currentNode to idx)
-            val next = nodeMap.getValue(currentNode).edges[path[idx]]
+    // Using the assumption that there is only one Z-node reachable from each A-node.
+    private fun getCandidateSteps(startNode: String, path: List<Int>, nodeMap: Map<String, Node>): Pair<BigInteger, BigInteger> {
+        var numSteps = 0L
+        // var idx: Int = 0
+        var distanceToZ: Long? = null
+        var cycleLength: Long? = null
+        val visited: MutableMap<State, Long> = mutableMapOf()
+
+        generateSequence(State(startNode, 0)) {
+            visited[it] = numSteps
+            val nextState = State(
+                nodeMap.getValue(it.node).edges[path[it.pathIdx]],
+                if (it.pathIdx + 1 < path.size) it.pathIdx + 1 else 0
+            )
             numSteps += 1
-            idx += 1
-            if (idx == path.size) idx = 0
-            if ((next to idx) in visited) {
+
+            if (nextState in visited) {
+                cycleLength = numSteps - visited.getValue(nextState)
                 null
-            } else if (next[2] == 'Z') {
-                candidates.add(numSteps)
-                next
+            } else if (nextState.node[2] == 'Z') {
+                // assert(distanceToZ == null)
+                distanceToZ = numSteps
+                nextState
             } else {
-                next
+                nextState
             }
         }.last()
 
-        println(candidates)
-//        assert(candidates.size == 1)
-        return candidates[0]
+        return valueOf(distanceToZ!!) to valueOf(cycleLength!!)
     }
 
     override fun partOne(input: String): Int {
@@ -96,20 +105,50 @@ object Y2023D08 : Solution {
         val startNodes = nodeMap.keys.filter { it[2] ==  'A' }.toHashSet()
         println("startNodes: $startNodes")
         val ans = startNodes.map {
-            getCandidateSteps(it, path, nodeMap)
-        }.map(BigInteger::valueOf).reduce(BigInteger::times)
-        println(ans)
+            getCandidateSteps(it, path, nodeMap).first
+        }.reduce(BigInteger::lcm)
+        print(ans)
         return ans
-//        var divisor = 0L
-//        for (cycle in cycles) {
-//            if (divisor == 0L) {
-//                divisor = cycle
-//            } else {
-//                divisor = gcd(divisor, cycle)
-//            }
-//        }
-//        return cycles.reduce(Long::times)
+
+        // var steps0 = ZERO
+        // var cycle0 = ONE
+        // // println("steps: $steps0, cylce: $cycle0")
+        // for ((steps1, cycle1) in ans) {
+        //     val a = cycle0
+        //     val b = -cycle1
+        //     val c = steps1 - steps0
+        //     // Now solve ax + by = c
+        //     val result = euclid(a, b)
+        //     val d = result.gcd
+        //     assert(c % d == ZERO)
+        //     val s = c / d
+        //     val x0 = s * result.x
+        //     val y0 = s * result.y
+        //     assert(cycle0 * x0 + steps0 == cycle1 * y0 + steps1)
+        //
+        //
+        //     steps0 = cycle0 * x0 + steps0
+        //     cycle0 = cycle0 * b / d
+        //     // println("steps: $steps0, cycle: $cycle0")
+        // }
+        // return steps0
     }
+}
+
+private fun BigInteger.lcm(b: BigInteger) =
+    (this*b).abs() / this.gcd(b)
+
+// private fun euclid(a: BigInteger, b: BigInteger, x: BigInteger, y: BigInteger): EuclidResult {
+//     if (b == BigInteger.ZERO) return EuclidResult(gcd = a, x = valueOf(1), y = valueOf(0))
+//     val result = euclid(b, a % b, y, x)
+//     return EuclidResult(result.gcd, result.x, result.y - a / b * result.x)
+// }
+
+data class EuclidResult(val gcd: BigInteger, val x: BigInteger, val y: BigInteger)
+private fun euclid(a: BigInteger, b: BigInteger) : EuclidResult {
+    if (a == ZERO) return EuclidResult(gcd = b, x = ZERO, y = ONE)
+    val r = euclid(b % a, a)
+    return EuclidResult(gcd = r.gcd, x = r.y - (b / a) * r.x, y = r.x)
 }
 
 //private fun gcd(a: Long, b: Long): Long {
