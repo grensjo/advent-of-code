@@ -7,7 +7,8 @@ import java.math.BigInteger
 @AdventDay(2023, 8, "Haunted Wasteland")
 class Y2023D08Test : AdventSpec<Y2023D08>({
 
-    val exampleInput = """
+    partOne {
+        """
             RL
 
             AAA = (BBB, CCC)
@@ -17,19 +18,15 @@ class Y2023D08Test : AdventSpec<Y2023D08>({
             EEE = (EEE, EEE)
             GGG = (GGG, GGG)
             ZZZ = (ZZZ, ZZZ)`
-        """.trimIndent()
+        """.trimIndent() shouldOutput 2
 
-    val exampleInput2 = """
+        """
             LLR
 
             AAA = (BBB, BBB)
             BBB = (AAA, ZZZ)
             ZZZ = (ZZZ, ZZZ)
-    """.trimIndent()
-
-    partOne {
-        exampleInput shouldOutput 2
-        exampleInput2 shouldOutput 6
+        """.trimIndent() shouldOutput 6
     }
 
     partTwo {
@@ -44,7 +41,7 @@ class Y2023D08Test : AdventSpec<Y2023D08>({
             22C = (22Z, 22Z)
             22Z = (22B, 22B)
             XXX = (XXX, XXX)
-        """.trimIndent() shouldOutput BigInteger.valueOf(6)
+        """.trimIndent() shouldOutput 6
     }
 
 })
