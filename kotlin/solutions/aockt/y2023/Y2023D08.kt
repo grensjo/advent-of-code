@@ -19,8 +19,8 @@ object Y2023D08 : Solution {
         }
         val nodeMap: Map<String, Node> = lines
             .drop(1)
-            .map {
-                it.split(' ', '=', '(', ',', ')').filterNot { it.isBlank() }
+            .map { line ->
+                line.split(' ', '=', '(', ',', ')').filterNot { it.isBlank() }
             }
             .map {
                 Node(it[0], listOf(it[1], it[2]))
