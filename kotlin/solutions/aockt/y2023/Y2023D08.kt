@@ -54,10 +54,9 @@ object Y2023D08 : Solution {
 
     override fun partTwo(input: String): Long {
         val (path, nodeMap) = parseInput(input)
-        val ans = nodeMap.keys.filter { it[2] == 'A' }.map { startNode ->
+        return nodeMap.keys.filter { it[2] == 'A' }.map { startNode ->
             getNumStepsToEndNode(path, nodeMap, startNode, isEndNode = { it[2] == 'Z' })
         }.reduce(Long::lcm)
-        return ans
     }
 }
 
