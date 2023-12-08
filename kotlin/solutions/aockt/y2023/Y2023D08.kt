@@ -7,7 +7,7 @@ private data class Node(val label: String, val edges: List<String>)
 
 object Y2023D08 : Solution {
 
-    private fun solve(input: String) : Int {
+    private fun solve(input: String, isGhost: Boolean) : Int {
         val lines = input.lineSequence().filterNot { it.isBlank() }.toList()
         val path = lines[0].trim().map {
             when(it) {
@@ -30,16 +30,26 @@ object Y2023D08 : Solution {
                 nodeList[0]
             }
 
-        var currentNode = "AAA"
+        val startNodes = if (isGhost) {
+            nodeMap.keys.filter { it[2] ==  'A' }.toHashSet()
+        } else {
+            setOf("AAA")
+        }
         var numSteps = 0
-        return generateSequence("AAA") {
-            val next = nodeMap.getValue(it).edges[path[numSteps % path.size]]
+        return generateSequence(startNodes) {currentNodes ->
+            val next = currentNodes.map {
+                nodeMap.getValue(it).edges[path[numSteps % path.size]]
+            }.toHashSet()
             numSteps += 1
-            if (next == "ZZZ") null else next
+            if (isGhost) {
+                if (next.all { it[2] == 'Z' }) null else next
+            } else {
+                if (next == hashSetOf("ZZZ")) null else next
+            }
         }.count()
     }
 
-    override fun partOne(input: String) = solve(input)
+    override fun partOne(input: String) = solve(input, isGhost = false)
 
-//    override fun partTwo(input: String) = solve(input)
+    override fun partTwo(input: String) = solve(input, isGhost = true)
 }
