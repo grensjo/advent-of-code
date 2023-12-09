@@ -13,3 +13,4 @@
 | 06  |           [Wait For It](https://adventofcode.com/2023/day/6)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D06.kt) |  ⭐⭐   |
 | 07  |           [Camel Cards](https://adventofcode.com/2023/day/7)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D07.kt) |  ⭐⭐   |
 | 08  |        [Haunted Wasteland](https://adventofcode.com/2023/day/8)        |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D08.kt) |  ⭐⭐   |
+| 09  |       [Mirage Maintenance](https://adventofcode.com/2023/day/9)        |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D09.kt) |  ⭐⭐   |
