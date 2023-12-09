@@ -25,11 +25,7 @@ object Y2023D08 : Solution {
             .map {
                 Node(it[0], listOf(it[1], it[2]))
             }
-            .groupBy { it.label }
-            .mapValues { (label, nodeList) ->
-                if (nodeList.size != 1) throw IllegalArgumentException()
-                nodeList[0]
-            }
+            .associateBy { it.label }
         return path to nodeMap
     }
 
