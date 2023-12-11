@@ -2,32 +2,29 @@ package aockt.y2023
 
 import io.github.jadarma.aockt.core.Solution
 import kotlin.math.absoluteValue
+import kotlin.math.max
+import kotlin.math.min
 
 object Y2023D11 : Solution {
-    data class Point(val r: Int, val c: Int) {
-        infix fun distanceTo(other: Point) = (r - other.r).absoluteValue + (c - other.c).absoluteValue
-    }
+    data class Point(val r: Int, val c: Int)
 
-    data class Image(val grid: MutableList<MutableList<Char>>) {
+    data class Image(val grid: MutableList<MutableList<Char>>, val expansionRate: Long) {
         private fun getHeight() = grid.size
         private fun getWidth() = grid[0].size
 
-        fun extend() {
-            println("Extending, size before: ${getHeight()} x ${getWidth()}")
-            printImage()
-            for (r in (0 until getHeight()).reversed()) {
+        private var emptyRows: List<Int> = buildList {
+            for (r in (0 until getHeight())) {
                 if (grid[r].all { it == '.' }) {
-                    println("Adding a row at $r")
-                    grid.add(r, (0 until getWidth()).map { '.' }.toMutableList())
+                    add(r)
                 }
             }
-            for (c in (0 until getWidth()).reversed()) {
+        }
+        private var emptyColumns: List<Int> = buildList {
+            for (c in (0 until getWidth())) {
                 if ((0 until getHeight()).all { grid[it][c] == '.' }) {
-                    println("Adding a column at $c")
-                    (0 until getHeight()).forEach {grid[it].add(c, '.') }
+                    add(c)
                 }
             }
-            println("Finished extending, size after: ${getHeight()} x ${getWidth()}")
         }
 
         fun getGalaxies() =
@@ -39,30 +36,32 @@ object Y2023D11 : Solution {
                         }
                     }
                 }
-            }.also { println(it) }
+            }
 
-        private fun printImage() = println(grid.map{ it.joinToString("") }.joinToString("\n"))
+        fun distance(p1: Point, p2: Point) : Long {
+            val imageDist: Long = (p1.r - p2.r).absoluteValue.toLong() + (p1.c - p2.c).absoluteValue.toLong()
+            val expansion =
+                emptyRows.count { it in min(p1.r, p2.r) until max(p1.r, p2.r) }.toLong() * (expansionRate - 1) +
+                emptyColumns.count { it in min(p1.c, p2.c) until max(p1.c, p2.c) }.toLong() * (expansionRate - 1)
+            return imageDist + expansion
+        }
     }
 
-    private fun String.toImage() = Image(lineSequence().map { it.toMutableList() }.toMutableList())
+    private fun String.toImage(expansionRate: Long) =
+        Image(lineSequence().map { it.toMutableList() }.toMutableList(), expansionRate)
 
-    override fun partOne(input: String): Int {
-        val image = input.toImage()
+    private fun solve(image: Image): Long {
         image.getGalaxies()
-        image.extend()
         val galaxies = image.getGalaxies()
-        var sum = 0
+        var sum = 0L
         for (i in 0 until (galaxies.size - 1)) {
             for (j in (i+1) until galaxies.size) {
-                val d = galaxies[i] distanceTo galaxies[j]
-                println("Distance between galaxy #$i (${galaxies[i]}) and #$j (${galaxies[j]}): $d")
-                sum += d
-                println("New sum: $sum")
+                sum += image.distance(galaxies[i], galaxies[j])
             }
         }
         return sum
     }
 
-    override fun partTwo(input: String): Int =
-        input.lineSequence().count()
+    override fun partOne(input: String) = solve(input.toImage(expansionRate = 2L))
+    override fun partTwo(input: String) = solve(input.toImage(expansionRate = 1000000))
 }
