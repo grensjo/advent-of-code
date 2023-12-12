@@ -48,7 +48,6 @@ object Y2023D12 : Solution {
             for (next in getNextStartOptions(0)) {
                 sum += dp(0, next)
             }
-            println("$this: $sum")
             return sum
         }
 
@@ -72,7 +71,16 @@ object Y2023D12 : Solution {
             TestCase(it[0].trim(), it[1].trim().split(',').map { l -> l.trim().toInt() })
         }
 
-    override fun partOne(input: String) = input.lineSequence().map {it.toTestCase()}.sumOf(TestCase::getNumPossibilities).also{println(it)}
-    override fun partTwo(input: String) = input.lineSequence().map {it.toTestCase().applyRepeat(5)}.sumOf(TestCase::getNumPossibilities).also{println(it)}
+    override fun partOne(input: String) =
+            input.lineSequence()
+                    .map {it.toTestCase()}
+                    .sumOf(TestCase::getNumPossibilities)
+                    .also{println(it)}
+
+    override fun partTwo(input: String) =
+            input.lineSequence()
+                    .map {it.toTestCase().applyRepeat(5)}
+                    .sumOf(TestCase::getNumPossibilities)
+                    .also{println(it)}
 }
 
