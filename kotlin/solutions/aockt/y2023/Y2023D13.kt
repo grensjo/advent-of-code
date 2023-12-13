@@ -17,7 +17,10 @@ object Y2023D13 : Solution {
                     grid.slice((i+1) until height)
                 ).all { (r1, r2) -> r1 == r2 }
 
-        private fun toTransposed(): Grid =
+        private fun getHorizontalReflections() : List<Int> =
+            (0..(height-2)).filter { isReflectedAt(it) }.map { it + 1 }.toList()
+
+        private fun toTransposed() : Grid =
             Grid(buildList {
                 for (i in 0 until width) {
                     add(buildList {
@@ -28,13 +31,10 @@ object Y2023D13 : Solution {
                 }
             })
 
-        private fun getHorizontalReflectionSum(): Int =
-            (0..(height-2)).filter { isReflectedAt(it) }.sumOf { it + 1 }
+        fun getReflections() : List<Int> =
+            getHorizontalReflections().map { it * 100 } + toTransposed().getHorizontalReflections()
 
-        fun solve() : Int =
-            100 * getHorizontalReflectionSum() + toTransposed().getHorizontalReflectionSum()
-
-        private fun flipSmudge(i: Int, j: Int) =
+        private fun flipSmudge(i: Int, j: Int) : Grid =
             Grid(
                 grid.withIndex().map { (r, row) ->
                     when {
@@ -50,34 +50,35 @@ object Y2023D13 : Solution {
                 }
             )
 
-        fun solveWithSmudge() : Int {
-            val sumWithoutSmudge = solve()
+        fun findSmudgedReflections() : Set<Int> {
+            val originalReflections = getReflections().toSet()
 
             for (i in 0 until height) {
                 for (j in 0 until width) {
-                    // Flip grid[i][j], and see if we got a different reflection line
-                    val sumWithSmudge = flipSmudge(i, j).solve()
-                    if (sumWithSmudge != sumWithoutSmudge && sumWithSmudge > 0) {
-                        println("Flipping ($i, $j) made the sum go $sumWithoutSmudge -> $sumWithSmudge")
-                        return sumWithSmudge
+                    // Flip grid[i][j], and see if we got any new reflection lines.
+                    val smudgedReflections = flipSmudge(i, j).getReflections().toSet()
+                    val newReflections = smudgedReflections - originalReflections
+                    if (newReflections.isNotEmpty()) {
+                        return newReflections
                     }
                 }
             }
 
-            throw IllegalArgumentException()
+            throw IllegalArgumentException("No flips created new reflections.")
         }
     }
 
     override fun partOne(input: String) =
-            input.split("\n\n")
-                .map(String::toGrid)
-                .sumOf(Grid::solve)
-                .also{println(it)}
+        input.split("\n\n")
+            .map(String::toGrid)
+            .flatMap(Grid::getReflections)
+            .sum()
+            .also{println(it)}
 
     override fun partTwo(input: String) =
         input.split("\n\n")
             .map(String::toGrid)
-            .sumOf(Grid::solveWithSmudge)
+            .flatMap(Grid::findSmudgedReflections)
+            .sum()
             .also{println(it)}
 }
-

@@ -1,7 +1,7 @@
 # Advent of Code solutions
 ## Problems
 
-2023 - 24 x ⭐
+2023 - 26 x ⭐
 
 | Day |                                 Title                                  |                         Python                          |                        Kotlin                        | Stars |
 |:---:|:----------------------------------------------------------------------:|:-------------------------------------------------------:|:----------------------------------------------------:|:-----:|
@@ -16,4 +16,5 @@
 | 09  |       [Mirage Maintenance](https://adventofcode.com/2023/day/9)        |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D09.kt) |  ⭐⭐   |
 | 10  |           [Pipe Maze](https://adventofcode.com/2023/day/10)            |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D10.kt) |  ⭐⭐   |
 | 11  |        [Cosmic Expansion](https://adventofcode.com/2023/day/11)        |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D11.kt) |  ⭐⭐   |
-| 11  |          [Hot Springs](https://adventofcode.com/2023/day/12)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D12.kt) |  ⭐⭐   |
+| 12  |          [Hot Springs](https://adventofcode.com/2023/day/12)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D12.kt) |  ⭐⭐   |
+| 13  |       [Point of Incidence](https://adventofcode.com/2023/day/13)       |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D13.kt) |  ⭐⭐   |
