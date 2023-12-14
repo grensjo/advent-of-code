@@ -22,4 +22,8 @@ class Y2023D14Test : AdventSpec<Y2023D14>({
     partOne {
         exampleInput shouldOutput 136
     }
+
+    partTwo {
+      exampleInput shouldOutput 64
+    }
 })
