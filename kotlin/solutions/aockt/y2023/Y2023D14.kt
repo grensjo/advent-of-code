@@ -6,16 +6,16 @@ import aockt.y2023.Y2023D14.Direction.SOUTH
 import aockt.y2023.Y2023D14.Direction.WEST
 import io.github.jadarma.aockt.core.Solution
 
-private fun List<MutableList<Char>>.copy() = map { it.toMutableList() }
+private fun List<List<Char>>.copy() = map { it.toMutableList() }
 
 object Y2023D14 : Solution {
 
-    private fun String.toGrid() =
-        Grid(lineSequence().map { it.toMutableList() }.toList())
+    private fun String.toPlatform() =
+        Platform(lineSequence().map { it.toMutableList() }.toList())
 
     enum class Direction { NORTH, WEST, SOUTH, EAST }
 
-    data class Grid(val grid: List<MutableList<Char>>) {
+    data class Platform(val grid: List<MutableList<Char>>) {
         private val height = grid.size
         private val width = grid[0].size
 
@@ -94,9 +94,9 @@ object Y2023D14 : Solution {
     }
 
     override fun partOne(input: String) : Int {
-        val grid = input.toGrid()
-        grid.tilt(NORTH)
-        return grid.getLoad().also{ println(it) }
+        val platform = input.toPlatform()
+        platform.tilt(NORTH)
+        return platform.getLoad().also{ println(it) }
     }
 
     /**
@@ -105,23 +105,24 @@ object Y2023D14 : Solution {
      * There has to be a cycle; utilize that to find the north beam load after a billion iterations.
      */
     override fun partTwo(input: String) : Int {
-        val grid = input.toGrid()
+        val platform = input.toPlatform()
 
         // Tilt the grid in all directions until we encounter a configuration we have previously
         // seen, i.e. traverse the graph from the start node until we find a cycle.
         var steps = 0
         val gridHashToStep : MutableMap<List<MutableList<Char>>, Int> = mutableMapOf()
         val stepToLoad : MutableList<Int> = mutableListOf()
-        while (grid.grid !in gridHashToStep) {
-            gridHashToStep[grid.grid.copy()] = steps++
-            stepToLoad.add(grid.getLoad())
-            grid.tiltAll()
+        while (platform.grid !in gridHashToStep) {
+            gridHashToStep[platform.grid.copy()] = steps++
+            stepToLoad.add(platform.getLoad())
+            platform.tiltAll()
         }
 
-        val stepsToCycle = gridHashToStep.getValue(grid.grid)
+        val stepsToCycle = gridHashToStep.getValue(platform.grid)
         val cycleLength = steps - stepsToCycle
         val resultIndex = stepsToCycle + ((1000000000 - stepsToCycle) % cycleLength)
-        // println("steps: $steps, stepsToCycle: $stepsToCycle, cycleLength: $cycleLength, resultIndex: $resultIndex, result: ${stepToLoad[resultIndex]}")
+        println("steps: $steps, stepsToCycle: $stepsToCycle, cycleLength: $cycleLength")
+        println("resultIndex: $resultIndex, result: ${stepToLoad[resultIndex]}")
         return stepToLoad[resultIndex].also { println(it) }
     }
 }
