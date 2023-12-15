@@ -1,7 +1,7 @@
 # Advent of Code solutions
 ## Problems
 
-2023 - 28 x ⭐
+2023 - 30 x ⭐
 
 | Day |                                 Title                                  |                         Python                          |                        Kotlin                        | Stars |
 |:---:|:----------------------------------------------------------------------:|:-------------------------------------------------------:|:----------------------------------------------------:|:-----:|
@@ -19,3 +19,4 @@
 | 12  |          [Hot Springs](https://adventofcode.com/2023/day/12)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D12.kt) |  ⭐⭐   |
 | 13  |       [Point of Incidence](https://adventofcode.com/2023/day/13)       |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D13.kt) |  ⭐⭐   |
 | 14  |    [Parabolic Reflector Dish](https://adventofcode.com/2023/day/14)    |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D14.kt) |  ⭐⭐   |
+| 15  |          [Lens Library](https://adventofcode.com/2023/day/15)          |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D15.kt) |  ⭐⭐   |
