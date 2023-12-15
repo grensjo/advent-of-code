@@ -8,7 +8,7 @@ private fun String.holidayHash() : Int =
     }
 
 object Y2023D15 : Solution {
-    class Lens(val label: String, val focalLength: Int) {
+    class Lens(val label: String, val focalLength: Int? = null) {
         val boxId: Int by lazy { label.holidayHash() }
     }
 
@@ -16,30 +16,24 @@ object Y2023D15 : Solution {
         input.split(',').sumOf(String::holidayHash).also { println(it) }
 
     override fun partTwo(input: String) : Int {
-        val boxes: List<MutableList<Lens>> = (0..255).map { mutableListOf() }
+        val boxes: List<LinkedHashMap<String, Lens>> = (0..255).map { LinkedHashMap() }
 
         for (step in input.split(',')) {
             when {
                 '=' in step -> {
                     val lens = Lens(step.substringBefore('='), step.substringAfter('=').toInt())
-                    val match = boxes[lens.boxId].withIndex().find { it.value.label == lens.label }
-                    if (match != null) {
-                        boxes[lens.boxId][match.index] = lens
-                    } else {
-                        boxes[lens.boxId] += lens
-                    }
+                    boxes[lens.boxId][lens.label] = lens
                 }
                 '-' in step -> {
-                    val toRemove = Lens(step.substringBefore('-'), -1)
-                    val match = boxes[toRemove.boxId].withIndex().find { it.value.label == toRemove.label }
-                    if (match != null) boxes[toRemove.boxId].removeAt(match.index)
+                    val lens = Lens(step.substringBefore('-'))
+                    boxes[lens.boxId].remove(lens.label)
                 }
             }
         }
 
         return boxes.withIndex().sumOf {
-            box -> box.value.withIndex().sumOf {
-                lens -> box.index.inc() * lens.index.inc() * lens.value.focalLength
+            box -> box.value.values.withIndex().sumOf {
+                lens -> box.index.inc() * lens.index.inc() * lens.value.focalLength!!
             }
         }.also { println(it) }
     }
