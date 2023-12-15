@@ -110,15 +110,15 @@ object Y2023D14 : Solution {
         // Tilt the grid in all directions until we encounter a configuration we have previously
         // seen, i.e. traverse the graph from the start node until we find a cycle.
         var steps = 0
-        val gridHashToStep : MutableMap<List<MutableList<Char>>, Int> = mutableMapOf()
+        val gridToStep : MutableMap<List<MutableList<Char>>, Int> = mutableMapOf()
         val stepToLoad : MutableList<Int> = mutableListOf()
-        while (platform.grid !in gridHashToStep) {
-            gridHashToStep[platform.grid.copy()] = steps++
+        while (platform.grid !in gridToStep) {
+            gridToStep[platform.grid.copy()] = steps++
             stepToLoad.add(platform.getLoad())
             platform.tiltAll()
         }
 
-        val stepsToCycle = gridHashToStep.getValue(platform.grid)
+        val stepsToCycle = gridToStep.getValue(platform.grid)
         val cycleLength = steps - stepsToCycle
         val resultIndex = stepsToCycle + ((1000000000 - stepsToCycle) % cycleLength)
         println("steps: $steps, stepsToCycle: $stepsToCycle, cycleLength: $cycleLength")
