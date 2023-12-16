@@ -7,13 +7,13 @@ object Y2023D16 : Solution {
 
     enum class Direction { NORTH, WEST, SOUTH, EAST }
 
-    data class Beam(val p: Point, val dir: Direction) {
+    data class Beam(val point: Point, val dir: Direction) {
         fun getNext(newDirection: Direction? = null) =
             when (newDirection ?: dir) {
-                NORTH -> Beam(Point(p.r - 1, p.c), NORTH)
-                SOUTH -> Beam(Point(p.r + 1, p.c), SOUTH)
-                WEST -> Beam(Point(p.r, p.c - 1), WEST)
-                EAST -> Beam(Point(p.r, p.c + 1), EAST)
+                NORTH -> Beam(Point(point.r - 1, point.c), NORTH)
+                SOUTH -> Beam(Point(point.r + 1, point.c), SOUTH)
+                WEST -> Beam(Point(point.r, point.c - 1), WEST)
+                EAST -> Beam(Point(point.r, point.c + 1), EAST)
             }
     }
 
@@ -29,35 +29,35 @@ object Y2023D16 : Solution {
         val nRows = grid.size
         val nCols = grid[0].size
 
-        private fun getNextBeams(beam: Beam) : List<Beam> {
-            return when (grid[beam.p]) {
-                '.' -> listOf(beam.getNext())
-                '/' -> listOf(beam.getNext(
-                    when (beam.dir) {
+        private fun Beam.getNextBeams() : List<Beam> {
+            return when (grid[point]) {
+                '.' -> listOf(getNext())
+                '/' -> listOf(getNext(
+                    when (dir) {
                         NORTH -> EAST
                         EAST -> NORTH
                         SOUTH -> WEST
                         WEST -> SOUTH
                     }))
-                '\\' -> listOf(beam.getNext(
-                    when (beam.dir) {
+                '\\' -> listOf(getNext(
+                    when (dir) {
                         NORTH -> WEST
                         WEST -> NORTH
                         SOUTH -> EAST
                         EAST -> SOUTH
                     }))
                 '-' ->
-                    when (beam.dir) {
-                        NORTH, SOUTH -> listOf(beam.getNext(WEST), beam.getNext(EAST))
-                        WEST, EAST -> listOf(beam.getNext())
+                    when (dir) {
+                        NORTH, SOUTH -> listOf(getNext(WEST), getNext(EAST))
+                        WEST, EAST -> listOf(getNext())
                     }
                 '|' ->
-                    when (beam.dir) {
-                        NORTH, SOUTH -> listOf(beam.getNext())
-                        WEST, EAST -> listOf(beam.getNext(NORTH), beam.getNext(SOUTH))
+                    when (dir) {
+                        NORTH, SOUTH -> listOf(getNext())
+                        WEST, EAST -> listOf(getNext(NORTH), getNext(SOUTH))
                     }
                 else -> throw IllegalArgumentException("Unknown grid entry.")
-            }.filter { it.p.isValid(nRows, nCols) }
+            }.filter { it.point.isValid(nRows, nCols) }
         }
 
         fun computeNumEnergized(start: Beam): Int {
@@ -70,8 +70,8 @@ object Y2023D16 : Solution {
                 val current = queue.removeFirst()
                 if (current in visited) continue
                 visited += current
-                energizedPoints.add(current.p)
-                queue.addAll(getNextBeams(current))
+                energizedPoints += current.point
+                queue.addAll(current.getNextBeams())
             }
 
             return energizedPoints.count()
