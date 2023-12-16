@@ -1,1 +1,1 @@
-/home/grensjo/git/advent-of-code/input/2023/day10.in
+../../../../../input/2023/day10.in

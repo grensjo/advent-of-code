@@ -1,1 +1,1 @@
-/home/grensjo/git/advent-of-code/input/2023/day12_p2.ans
+../../../../../input/2023/day12_p2.ans

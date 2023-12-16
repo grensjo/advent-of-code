@@ -2,6 +2,7 @@ import click
 import shutil
 import subprocess
 from pathlib import Path
+from os import path
 
 
 def get_path(year: int, day: int, part: int | None = None) -> Path:
@@ -27,6 +28,10 @@ def download_input(year: int, day: int) -> bool:
     return cmd.returncode == 0
 
 
+def create_symlink(link_path, target_path):
+    link_path.symlink_to(path.relpath(target_path, link_path.parent))
+
+
 def fix_file(year: int, day: int, part: int | None = None):
     path = get_path(year, day, part)
     kotlin_path = get_kotlin_path(year, day, part)
@@ -34,17 +39,17 @@ def fix_file(year: int, day: int, part: int | None = None):
     if path.exists() and kotlin_path.exists():
         click.echo("({year}, {day}, {part}) already exists in both places.")
     elif path.exists() and not kotlin_path.exists():
-        kotlin_path.symlink_to(path)
+        create_symlink(kotlin_path, path)
         click.echo("({year}, {day}, {part}): created symlink in Kotlin directory.")
     elif not path.exists() and kotlin_path.exists():
         shutil.move(kotlin_path, path)
-        kotlin_path.symlink_to(path)
+        create_symlink(kotlin_path, path)
         click.echo("({year}, {day}, {part}): moved file in Kotlin directory and replaced with symlink.")
     else:
         if part is None:
             if download_input(year, day):
                 shutil.move(get_tmp_path(), path)
-                kotlin_path.symlink_to(path)
+                create_symlink(kotlin_path, path)
                 click.echo("({year}, {day}, {part}): downloaded input and created symlink.")
             else:
                 click.echo("({year}, {day}, {part}): error, input download failed.")
@@ -52,7 +57,7 @@ def fix_file(year: int, day: int, part: int | None = None):
             ans = click.prompt(f'Answer for {year} day {day} part {part}')
             with open(path, 'w') as f:
                 print(ans, file=f)
-            kotlin_path.symlink_to(path)
+            create_symlink(kotlin_path, path)
             
 
 @click.command(help="""Initializes Advent of Code input and answer files and symlinks. Downloads input files using aocdl if not present.""")
