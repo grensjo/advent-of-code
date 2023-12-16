@@ -1,0 +1,1 @@
+/home/grensjo/git/advent-of-code/input/2023/day11_p2.ans
