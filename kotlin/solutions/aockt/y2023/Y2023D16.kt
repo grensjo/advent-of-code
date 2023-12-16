@@ -61,7 +61,7 @@ object Y2023D16 : Solution {
         }
 
         fun computeNumEnergized(start: Beam): Int {
-            val energizedMap: MutableMap<Point, Int> = mutableMapOf()
+            val energizedPoints: MutableSet<Point> = mutableSetOf()
             val visited: MutableSet<Beam> = mutableSetOf()
             val queue: ArrayDeque<Beam> = ArrayDeque()
             queue.add(start)
@@ -70,11 +70,11 @@ object Y2023D16 : Solution {
                 val current = queue.removeFirst()
                 if (current in visited) continue
                 visited += current
-                energizedMap[current.p] = 1 + (energizedMap[current.p] ?: 0)
+                energizedPoints.add(current.p)
                 queue.addAll(getNextBeams(current))
             }
 
-            return energizedMap.values.count { it > 0 }
+            return energizedPoints.count()
         }
     }
 
