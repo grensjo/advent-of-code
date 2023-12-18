@@ -43,6 +43,8 @@ object Y2023D17 : Solution {
                     }
                 }
                 .filter { it.isValid(numRows, numCols) }
+                // Ultra crucibles need to end with at least 4 steps in the same direction.
+                .filterNot { ultra && it.r == numRows - 1 && it.c == numCols - 1 && it.dirCount < 4}
                 .toList()
     }
 
@@ -85,7 +87,6 @@ object Y2023D17 : Solution {
 
     override fun partOne(input: String) =
         input.toCity(ultra = false).shortestPath().also { println(it) }
-
 
     override fun partTwo(input: String) =
         input.toCity(ultra = true).shortestPath().also { println(it) }
