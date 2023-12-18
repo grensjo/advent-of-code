@@ -5,33 +5,46 @@ import aockt.y2023.Y2023D18.Direction.*
 import aockt.y2023.Y2023D18.Lagoon
 import aockt.y2023.Y2023D18.Point
 import io.github.jadarma.aockt.core.Solution
+import kotlin.math.absoluteValue
 
 @OptIn(ExperimentalStdlibApi::class)
-private fun String.toDigStep() =
+private fun String.toDigStep(isPart2: Boolean = false) =
     trim().split(' ').let {
-        DigStep(
-            when (it[0]) {
-                "U" -> NORTH
-                "R" -> EAST
-                "D" -> SOUTH
-                "L" -> WEST
-                else -> throw IllegalArgumentException("Unknown direction '$it[0]'.")
-            },
-            it[1].toInt(),
-            it[2].substringAfter("(#").substringBefore(")").hexToInt()
-        )
+        if (isPart2) {
+            val hexString = it[2].substringAfter("(#").substringBefore(")")
+            val steps = hexString.subSequence(0, 5)
+            DigStep(
+                when (hexString[5]) {
+                    '0' -> EAST
+                    '1' -> SOUTH
+                    '2' -> WEST
+                    '3' -> NORTH
+                    else -> throw IllegalArgumentException("Unknown direction '${hexString[5]}'.")
+                },
+                steps.toString().hexToLong()
+            )
+        } else {
+            DigStep(
+                when (it[0]) {
+                    "U" -> NORTH
+                    "R" -> EAST
+                    "D" -> SOUTH
+                    "L" -> WEST
+                    else -> throw IllegalArgumentException("Unknown direction '$it[0]'.")
+                },
+                it[1].toLong(),
+            )
+        }
     }
 
 private fun List<DigStep>.toLagoon() : Lagoon {
-    return Lagoon(buildSet {
+    return Lagoon(buildList {
         var lastPoint = Point(0, 0)
         add(lastPoint)
         for (digStep in this@toLagoon) {
-            for (i in 0 until digStep.steps) {
-                val nextPoint = lastPoint.step(digStep.dir)
-                add(nextPoint)
-                lastPoint = nextPoint
-            }
+            val nextPoint = lastPoint.step(digStep)
+            add(nextPoint)
+            lastPoint = nextPoint
         }
     })
 }
@@ -39,54 +52,45 @@ private fun List<DigStep>.toLagoon() : Lagoon {
 object Y2023D18 : Solution {
 
     enum class Direction { NORTH, WEST, SOUTH, EAST }
-    data class DigStep(val dir: Direction, val steps: Int, val color: Int)
+    data class DigStep(val dir: Direction, val steps: Long)
 
-    data class Point(val r: Int, val c: Int) {
-        fun step(dir: Direction) =
-            when (dir) {
-                NORTH -> Point(r - 1, c)
-                SOUTH -> Point(r + 1, c)
-                WEST -> Point(r, c - 1)
-                EAST -> Point(r, c + 1)
+    data class Point(val r: Long, val c: Long) {
+        fun step(instruction : DigStep) =
+            when (instruction.dir) {
+                NORTH -> Point(r - instruction.steps, c)
+                SOUTH -> Point(r + instruction.steps, c)
+                WEST -> Point(r, c - instruction.steps)
+                EAST -> Point(r, c + instruction.steps)
             }
 
-        fun getNeighbours() : List<Point> = entries.map(::step)
-    }
-
-    data class Lagoon(val trench: Set<Point>) {
-        private fun findInteriorPoint() : Point {
-            trench.groupBy { it.r }.forEach { row ->
-                row.value.sortedBy { it.c }.zipWithNext().forEach {(p1, p2) ->
-                    if (p2.c - p1.c > 1) return p1.step(EAST)
-                }
-            }
-            throw AssertionError("Could not find any interior point.")
-        }
-
-        fun computeLagoonSize() : Int {
-            val start = findInteriorPoint()
-            val queue : ArrayDeque<Point> = ArrayDeque()
-            val visited : MutableSet<Point> = mutableSetOf()
-            queue.add(start)
-
-            while (queue.isNotEmpty()) {
-                val current = queue.removeFirst()
-                if (current in visited || current in trench) continue
-                visited.add(current)
-                queue.addAll(current.getNeighbours().filterNot { it in visited || it in trench })
-            }
-
-            return visited.size + trench.size
+        infix fun distanceTo(other: Point) : Long {
+            assert (r == other.r || c == other.c)
+            return (r - other.r).absoluteValue + (c - other.c).absoluteValue
         }
     }
 
-    override fun partOne(input: String) = input
-        .lineSequence()
-        .map(String::toDigStep)
-        .toList()
-        .toLagoon()
-        .computeLagoonSize()
-        .also { println(it) }
+    data class Lagoon(val trench: List<Point>) {
+        fun computeLagoonSize() : Long =
+            (
+                trench.zipWithNext().sumOf { (p1, p2) ->
+                    (p1.c*p2.r) - (p1.r*p2.c)
+                } + computeTrenchLength()
+            ) / 2 + 1
 
-//    override fun partTwo(input: String) = input.length
+
+        private fun computeTrenchLength() : Long =
+            trench.zipWithNext().sumOf {(p1, p2) -> p1 distanceTo p2}
+    }
+
+    private fun solve(input: String, isPart2: Boolean = false) =
+        input
+            .lineSequence()
+            .map {it.toDigStep(isPart2=isPart2) }
+            .toList()
+            .toLagoon()
+            .computeLagoonSize()
+            .also { println(it) }
+
+    override fun partOne(input: String) = solve(input)
+    override fun partTwo(input: String) = solve(input, isPart2 = true)
 }
