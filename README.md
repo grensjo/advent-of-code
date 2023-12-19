@@ -1,7 +1,7 @@
 # Advent of Code solutions
 ## Problems
 
-2023 - 32 x ⭐
+2023 - 37 x ⭐
 
 | Day |                                 Title                                  |                         Python                          |                        Kotlin                        | Stars |
 |:---:|:----------------------------------------------------------------------:|:-------------------------------------------------------:|:----------------------------------------------------:|:-----:|
@@ -21,3 +21,6 @@
 | 14  |    [Parabolic Reflector Dish](https://adventofcode.com/2023/day/14)    |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D14.kt) |  ⭐⭐   |
 | 15  |          [Lens Library](https://adventofcode.com/2023/day/15)          |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D15.kt) |  ⭐⭐   |
 | 16  |     [The Floor Will Be Lava](https://adventofcode.com/2023/day/16)     |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D16.kt) |  ⭐⭐   |
+| 17  |        [Clumsy Crucible](https://adventofcode.com/2023/day/17)         |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D17.kt) |  ⭐⭐   |
+| 18  |        [Lavaduct Lagoon](https://adventofcode.com/2023/day/18)         |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D18.kt) |  ⭐⭐   |
+| 19  |            [Aplenty](https://adventofcode.com/2023/day/19)             |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D19.kt) |   ⭐   |
