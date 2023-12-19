@@ -48,6 +48,7 @@ private fun String.parse() : Pair<Map<String, Workflow>, List<Part>> =
 object Y2023D19 : Solution {
 
     enum class Category { X, M, A, S }
+
     data class Part(val ratings: Map<Category, Int>)
 
     data class PartSet(val constraints: Map<Category, IntRange>) {
@@ -55,7 +56,11 @@ object Y2023D19 : Solution {
         fun applyCondition(condition: Condition) =
             PartSet(
                 constraints.map {
-                    if (it.key == condition.category) it.key to (condition.intersect(it.value)) else it.key to it.value
+                    if (it.key == condition.category) {
+                        it.key to (condition.intersect(it.value))
+                    } else {
+                        it.key to it.value
+                    }
                 }.toMap()
             )
 
@@ -91,25 +96,34 @@ object Y2023D19 : Solution {
         fun acceptsPart(part: Part) : Boolean =
             part.ratings.getValue(category) in allowedValues
 
-        infix fun intersect(range: IntRange) : IntRange =
+        fun intersect(range: IntRange) : IntRange =
             when {
                 allowedValues.first == 1 -> when {
+                    // This condition is of the form "<X", where X is `allowedValues.last`. Handle
+                    // the three cases when the range is completely disjoint with the condition,
+                    // when the entire range fulfills the condition, and when there is partial
+                    // overlap.
                     allowedValues.last < range.first -> IntRange.EMPTY
                     allowedValues.last >= range.last -> range
                     else -> range.first..allowedValues.last
                 }
                 allowedValues.last == 4000 -> when {
-                    allowedValues.first <= range.first -> range
+                    // This condition is of the form ">X", where X is `allowedValues.first`. Handle
+                    // the three cases when the range is completely disjoint with the condition,
+                    // when the entire range fulfills the condition, and when there is partial
+                    // overlap.
                     allowedValues.first > range.last -> IntRange.EMPTY
+                    allowedValues.first <= range.first -> range
                     else -> allowedValues.first..range.last
                 }
                 else -> throw IllegalArgumentException("Not a simple > or < condition.")
             }
     }
-    data class Rule(val condition: Condition, val destination: String) {
-    }
+
+    data class Rule(val condition: Condition, val destination: String)
 
     data class Workflow(val label: String, val rules: List<Rule>, val default: String) {
+        // Process a part, and return its next workflow label.
         fun processPart(part: Part) : String {
             for (rule in rules) {
                 if (rule.condition.acceptsPart(part)) {
@@ -125,12 +139,9 @@ object Y2023D19 : Solution {
 
         return parts.filter { part ->
             var nextWorkflow = "in"
-            var i = 0
             while (nextWorkflow !in listOf("A", "R")) {
                 nextWorkflow = workflows[nextWorkflow]!!.processPart(part)
-                i++
             }
-            println("Number of steps for part: $i")
             nextWorkflow == "A"
         }.sumOf { part ->
             part.ratings.values.sum()
@@ -157,8 +168,6 @@ object Y2023D19 : Solution {
 
     override fun partTwo(input: String) : Long {
         val (workflows, _) = input.parse()
-//        workflows.map { it.key }.map { label -> workflows.values.flatMap { it.rules }.filter { it.destination == label }.count().plus(workflows.count { label == it.value.default }).also { println("$label has $it in-edges.")} }
-
         return workflows.countAccepted(PartSet.UNIVERSE, "in").also { println(it) }
     }
 }
