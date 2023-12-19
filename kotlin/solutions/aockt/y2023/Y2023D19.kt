@@ -1,19 +1,22 @@
 package aockt.y2023
 
-import aockt.y2023.Y2023D19.Operation.*
+import aockt.y2023.Y2023D19.Category
+import aockt.y2023.Y2023D19.Category.*
+import aockt.y2023.Y2023D19.Condition
 import aockt.y2023.Y2023D19.Part
 import aockt.y2023.Y2023D19.Rule
 import aockt.y2023.Y2023D19.Workflow
 import io.github.jadarma.aockt.core.Solution
 
 private fun String.toRule() : Rule {
-    val op = when {
-        '<' in this -> LESS_THAN
-        '>' in this -> GREATER_THAN
-        else -> throw IllegalArgumentException("Unknown operation in rule $this.")
-    }
     return split('<', '>', ':').let {
-        Rule(it[0][0], op, it[1].toInt(), it[2])
+        val value = it[1].toInt()
+        val allowedValues = when {
+            '<' in this -> 1 until value
+            '>' in this -> (value + 1)..4000
+            else -> throw IllegalArgumentException("Unknown operation in rule $this.")
+        }
+        Rule(Condition(valueOf(it[0].uppercase()), allowedValues), it[2])
     }
 }
 
@@ -32,7 +35,7 @@ private fun String.toPart() : Part =
     Part(
         substringAfter('{').substringBefore('}').split(',').map { partString ->
             partString.split('=').let {
-                it[0][0] to it[1].toInt()
+                Category.valueOf(it[0].uppercase()) to it[1].toInt()
             }
         }.toMap()
     )
@@ -44,21 +47,72 @@ private fun String.parse() : Pair<Map<String, Workflow>, List<Part>> =
 
 object Y2023D19 : Solution {
 
-    enum class Operation { LESS_THAN, GREATER_THAN }
-    data class Part(val ratings: Map<Char, Int>)
+    enum class Category { X, M, A, S }
+    data class Part(val ratings: Map<Category, Int>)
 
-    data class Rule(val category: Char, val operation: Operation, val value: Int, val destination: String) {
+    data class PartSet(val constraints: Map<Category, IntRange>) {
+
+        fun applyCondition(condition: Condition) =
+            PartSet(
+                constraints.map {
+                    if (it.key == condition.category) it.key to (condition.intersect(it.value)) else it.key to it.value
+                }.toMap()
+            )
+
+        fun size() = constraints.values.map(IntRange::count).map(Int::toLong).reduce(Long::times)
+
+        companion object {
+            val UNIVERSE = PartSet(
+                mapOf(
+                    X to 1..4000,
+                    M to 1..4000,
+                    A to 1..4000,
+                    S to 1..4000,
+                )
+            )
+        }
+    }
+
+    data class Condition(val category: Category, val allowedValues: IntRange) {
+        init {
+            assert(allowedValues.first == 1 || allowedValues.last == 4000)
+        }
+
+        fun complement() =
+            Condition(
+                category,
+                when {
+                    allowedValues.first == 1 -> allowedValues.last.inc()..4000
+                    allowedValues.last == 4000 -> 1..allowedValues.first.dec()
+                    else -> throw IllegalArgumentException("Not a simple > or < condition.")
+                },
+            )
+
         fun acceptsPart(part: Part) : Boolean =
-            when (operation) {
-                LESS_THAN -> part.ratings[category]!! < value
-                GREATER_THAN -> part.ratings[category]!! > value
+            part.ratings.getValue(category) in allowedValues
+
+        infix fun intersect(range: IntRange) : IntRange =
+            when {
+                allowedValues.first == 1 -> when {
+                    allowedValues.last < range.first -> IntRange.EMPTY
+                    allowedValues.last >= range.last -> range
+                    else -> range.first..allowedValues.last
+                }
+                allowedValues.last == 4000 -> when {
+                    allowedValues.first <= range.first -> range
+                    allowedValues.first > range.last -> IntRange.EMPTY
+                    else -> allowedValues.first..range.last
+                }
+                else -> throw IllegalArgumentException("Not a simple > or < condition.")
             }
+    }
+    data class Rule(val condition: Condition, val destination: String) {
     }
 
     data class Workflow(val label: String, val rules: List<Rule>, val default: String) {
         fun processPart(part: Part) : String {
             for (rule in rules) {
-                if (rule.acceptsPart(part)) {
+                if (rule.condition.acceptsPart(part)) {
                     return rule.destination
                 }
             }
@@ -71,14 +125,40 @@ object Y2023D19 : Solution {
 
         return parts.filter { part ->
             var nextWorkflow = "in"
+            var i = 0
             while (nextWorkflow !in listOf("A", "R")) {
                 nextWorkflow = workflows[nextWorkflow]!!.processPart(part)
+                i++
             }
+            println("Number of steps for part: $i")
             nextWorkflow == "A"
         }.sumOf { part ->
             part.ratings.values.sum()
-        }
+        }.also { println(it) }
     }
 
-//    override fun partTwo(input: String) = input.length
+    private fun Map<String, Workflow>.countAccepted(partSet: PartSet, nextLabel: String) : Long {
+        if (nextLabel == "A") {
+            return partSet.size()
+        } else if (nextLabel == "R") {
+            return 0
+        }
+
+        val workflow = this[nextLabel]!!
+        var currentSet = partSet
+        var sum = 0L
+        for (rule in workflow.rules) {
+            sum += countAccepted(currentSet.applyCondition(rule.condition), rule.destination)
+            currentSet = currentSet.applyCondition(rule.condition.complement())
+        }
+        sum += countAccepted(currentSet, workflow.default)
+        return sum
+    }
+
+    override fun partTwo(input: String) : Long {
+        val (workflows, _) = input.parse()
+//        workflows.map { it.key }.map { label -> workflows.values.flatMap { it.rules }.filter { it.destination == label }.count().plus(workflows.count { label == it.value.default }).also { println("$label has $it in-edges.")} }
+
+        return workflows.countAccepted(PartSet.UNIVERSE, "in").also { println(it) }
+    }
 }

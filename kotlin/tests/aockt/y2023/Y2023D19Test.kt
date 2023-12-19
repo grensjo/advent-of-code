@@ -6,8 +6,7 @@ import io.github.jadarma.aockt.test.AdventSpec
 @AdventDay(2023, 19, "Aplenty")
 class Y2023D19Test : AdventSpec<Y2023D19>({
 
-    partOne {
-        """
+    val exampleInput = """
             px{a<2006:qkq,m>2090:A,rfg}
             pv{a>1716:R,A}
             lnx{m>1548:A,A}
@@ -25,13 +24,14 @@ class Y2023D19Test : AdventSpec<Y2023D19>({
             {x=2036,m=264,a=79,s=2244}
             {x=2461,m=1339,a=466,s=291}
             {x=2127,m=1623,a=2188,s=1013}
-        """.trimIndent() shouldOutput 19114
+        """.trimIndent()
+
+    partOne {
+         exampleInput shouldOutput 19114
     }
 
-//    partTwo {
-//        """
-//            a
-//        """.trimIndent() shouldOutput 1
-//    }
+    partTwo {
+        exampleInput shouldOutput 167409079868000
+    }
 
 })
