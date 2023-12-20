@@ -1,7 +1,7 @@
 # Advent of Code solutions
 ## Problems
 
-2023 - 38 x ⭐
+2023 - 39 x ⭐
 
 | Day |                                 Title                                  |                         Python                          |                        Kotlin                        | Stars |
 |:---:|:----------------------------------------------------------------------:|:-------------------------------------------------------:|:----------------------------------------------------:|:-----:|
@@ -24,3 +24,4 @@
 | 17  |        [Clumsy Crucible](https://adventofcode.com/2023/day/17)         |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D17.kt) |  ⭐⭐   |
 | 18  |        [Lavaduct Lagoon](https://adventofcode.com/2023/day/18)         |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D18.kt) |  ⭐⭐   |
 | 19  |            [Aplenty](https://adventofcode.com/2023/day/19)             |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D19.kt) |  ⭐⭐   |
+| 19  |       [Pulse Propagation](https://adventofcode.com/2023/day/20)        |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D20.kt) |   ⭐   |
