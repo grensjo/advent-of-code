@@ -24,4 +24,6 @@
 | 17  |        [Clumsy Crucible](https://adventofcode.com/2023/day/17)         |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D17.kt) |  ⭐⭐   |
 | 18  |        [Lavaduct Lagoon](https://adventofcode.com/2023/day/18)         |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D18.kt) |  ⭐⭐   |
 | 19  |            [Aplenty](https://adventofcode.com/2023/day/19)             |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D19.kt) |  ⭐⭐   |
-| 19  |       [Pulse Propagation](https://adventofcode.com/2023/day/20)        |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D20.kt) |   ⭐   |
+| 20  |       [Pulse Propagation](https://adventofcode.com/2023/day/20)        |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D20.kt) |   ⭐   |
+| 21  |          [Step Counter](https://adventofcode.com/2023/day/21)          |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D21.kt) |   ⭐   |
+| 22  |           [Sand Slabs](https://adventofcode.com/2023/day/22)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D22.kt) |  ⭐⭐   |
