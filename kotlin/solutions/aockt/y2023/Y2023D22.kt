@@ -110,8 +110,8 @@ object Y2023D22 : Solution {
 
     override fun partOne(input: String) : Int {
         val sandStack = SandStack(input.toBrickList())
-        // Return the number of bricks that has a parent with that brick as it's only child -- i.e. is the sole
-        // supporting brick of some brick.
+        // Return the number of bricks that do NOT have a parent with that brick as it's only child -- i.e. the number
+        // of bricks that are not the sole supporting brick of any brick.
         return sandStack.bricksById.values.filterNot {
             it.parents.any {p -> sandStack.bricksById[p]!!.children.size == 1}
         }.count().also { println(it) }
@@ -124,12 +124,14 @@ object Y2023D22 : Solution {
         // Go through each brick to see what the consequences would be if that brick disintegrated. (This could be done
         // in any order.)
         for (removedBrick in sandStack.bricksByZ.asSequence().flatten()) {
-            // Map that tracks for each brick how many of its supporting bricks would have fallen/disintegrated. When
-            // this is equal to the total number of supporting bricks we know that this brick would also fall.
+            // Map that tracks for each brick how many of its supporting bricks have fallen/disintegrated. When
+            // this is equal to the number of children, we know that all bricks that support this brick has fallen.
             val nodeToNumRemovedSupports: MutableMap<Int, Int> = mutableMapOf()
 
-            // Use a priority queue to make sure we process the nodes in order of increasing upper z coordinate (this
-            // corresponds to is a topological sort of the graph formed by the parent edges).
+            // We will traverse all nodes reachable from removedBrick using parent pointers. Use a priority queue to
+            // make sure we process the nodes in order of increasing upper z coordinate, and thus never process a bruck
+            // until all it's reachable children have been processed. (Sorting by z corresponds to is a topological sort
+            // of the graph formed by the parent edges.)
             val queue: PriorityQueue<Brick> = PriorityQueue(Comparator.comparing(Brick::maxZ))
             queue.add(removedBrick)
 
