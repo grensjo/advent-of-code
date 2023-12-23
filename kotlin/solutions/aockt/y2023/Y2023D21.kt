@@ -4,8 +4,6 @@ import aockt.y2023.Y2023D21.Direction.*
 import aockt.y2023.Y2023D21.Farm
 import aockt.y2023.Y2023D21.TileType.*
 import io.github.jadarma.aockt.core.Solution
-import java.util.*
-import kotlin.collections.ArrayDeque
 
 private fun Char.toTileType() =
     when (this) {
@@ -45,21 +43,26 @@ object Y2023D21 : Solution {
         private val numRows: Int = grid.size
         private val numCols: Int = grid[0].size
 
-        fun countNodesAtDistance(distance: Int) : Int {
-            println("countNodesAtDistance()")
+        fun countNodesAtDistance(distance: Int, startRow: Int? = null, startCol: Int? = null) : Int {
             var currentNodes: Set<Node> = mutableSetOf()
             var nextNodes: MutableSet<Node> = mutableSetOf()
-            for (r in 0 until numRows) {
-                for (c in 0 until numCols) {
-                    if (grid[r][c] == START) {
-                        currentNodes += Node(r, c)
-                        break
+
+            if (startRow != null && startCol != null) {
+                currentNodes += Node(startRow, startCol)
+            } else {
+                // If no explicit start point was provided, use the one from the input.
+                for (r in 0 until numRows) {
+                    for (c in 0 until numCols) {
+                        if (grid[r][c] == START) {
+                            currentNodes += Node(r, c)
+                            break
+                        }
                     }
+                    if (currentNodes.isNotEmpty()) break
                 }
-                if (currentNodes.isNotEmpty()) break
             }
 
-            for (currentStep in 0 until 64) {
+            for (currentStep in 0 until distance) {
                 for (current in currentNodes) {
                     val neighbours = current.getNeighbours(numRows, numCols)
                         .filter { (r, c) -> grid[r][c] in listOf(START, GARDEN) }
@@ -69,11 +72,50 @@ object Y2023D21 : Solution {
                 nextNodes = mutableSetOf()
             }
 
+            println("distance: $distance, startRow: $startRow, startCol: $startCol, result: ${currentNodes.size}")
             return currentNodes.size
         }
     }
 
     override fun partOne(input: String) = input.toFarm().countNodesAtDistance(64).also { println(it) }
 
-//    override fun partTwo(input: String) = input.length
+    override fun partTwo(input: String): Long {
+        val farm = input.toFarm()
+
+        var evenUnits = 1L
+        var oddUnits = 0L
+
+        val N = 202300L
+        for (i in 1L until N) {
+            val num = 4L*i
+            if (i % 2L == 1L) {
+                oddUnits += num
+            } else {
+                evenUnits += num
+            }
+        }
+//        var evenUnitsCmp = 4 * (N / 2) * (N / 2 + 1) + 1
+//        var oddUnitsCmp = 4 * (N+1)*(N+1)
+
+//        println("evenUnits: $oddUnits, evenUnitsCmp: $evenUnits")
+//        println("oddUnits: $evenUnits, oddUnitsCmp: $oddUnitsCmp")
+//        println("tot: ${oddUnits+evenUnits}, calc: ${2*N*(N+1) + 1}")
+
+        val innerEvenCount = farm.countNodesAtDistance(129, 65, 65)
+        val innerOddCount = farm.countNodesAtDistance(130, 65, 65)
+        var sum = innerEvenCount*oddUnits + innerOddCount*evenUnits
+//        var sum = innerEvenCount*evenUnits + innerOddCount*oddUnits
+
+        sum += farm.countNodesAtDistance(130, 65, 0)
+        sum += farm.countNodesAtDistance(130, 65, 130)
+        sum += farm.countNodesAtDistance(130, 0, 65)
+        sum += farm.countNodesAtDistance(130, 130, 65)
+
+        sum += (N - 1) * farm.countNodesAtDistance(130, 0, 0)
+        sum += (N - 1) * farm.countNodesAtDistance(130, 0, 130)
+        sum += (N - 1) * farm.countNodesAtDistance(130, 130, 130)
+        sum += (N - 1) * farm.countNodesAtDistance(130, 130, 0)
+
+        return sum.also { println(it) }
+    }
 }

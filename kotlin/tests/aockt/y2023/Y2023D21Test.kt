@@ -6,8 +6,7 @@ import io.github.jadarma.aockt.test.AdventSpec
 @AdventDay(2023, 21, "Step Counter")
 class Y2023D21Test : AdventSpec<Y2023D21>({
 
-    partOne {
-        """
+    val exampleInput = """
             ...........
             .....###.#.
             .###.##..#.
@@ -19,13 +18,14 @@ class Y2023D21Test : AdventSpec<Y2023D21>({
             .##.#.####.
             .##..##.##.
             ...........
-        """.trimIndent() shouldOutput 42
+        """.trimIndent()
+
+    partOne {
+        exampleInput shouldOutput 42
     }
 
-//    partTwo {
-//        """
-//            a
-//        """.trimIndent() shouldOutput 1
-//    }
+    partTwo {
+        exampleInput shouldOutput 42
+    }
 
 })
