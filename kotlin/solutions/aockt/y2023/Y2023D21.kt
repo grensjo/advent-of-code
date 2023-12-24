@@ -43,13 +43,15 @@ object Y2023D21 : Solution {
         private val numRows: Int = grid.size
         private val numCols: Int = grid[0].size
 
-        fun toMegaFarm() =
+        // Create a new farm identical to this one, but tripled horizontally. I.e. if the original farm looks  like F,
+        // the new one will look like FFF. Will be very useful for part 2. :)
+        fun toTripleFarmRow() =
             Farm(
                 buildList {
-                    for (r in 0 until numRows * 3) {
+                    for (r in 0 until numRows) {
                         add(buildList {
                             for (c in 0 until numCols * 3) {
-                                add(grid[r % numRows][c % numCols])
+                                add(grid[r][c % numCols])
                             }
                         })
                     }
@@ -57,6 +59,8 @@ object Y2023D21 : Solution {
             )
 
         fun countNodesAtDistance(distance: Int, startRow: Int? = null, startCol: Int? = null) : Int {
+            // TODO: optimize this using the insight that we can always move back to a node with 2 steps, so we don't
+            //  need to keep searching from each node at every step.
             var currentNodes: MutableSet<Node> = mutableSetOf()
             var nextNodes: MutableSet<Node> = mutableSetOf()
 
@@ -85,7 +89,6 @@ object Y2023D21 : Solution {
                 nextNodes = mutableSetOf()
             }
 
-            println("distance: $distance, startRow: $startRow, startCol: $startCol, result: ${currentNodes.size}")
             return currentNodes.size
         }
     }
@@ -98,6 +101,8 @@ object Y2023D21 : Solution {
         var evenUnits = 1L
         var oddUnits = 0L
 
+        // The given number of steps is 202300 * 131 + 65. 131 is the input grid size, 65 is the number of steps from
+        // the middle (start) cell to the edge. TODO: write better comments to explain this...
         val N = 202300L
         for (i in 1L until N) {
             val num = 4L*i
@@ -107,31 +112,23 @@ object Y2023D21 : Solution {
                 evenUnits += num
             }
         }
-//        var evenUnitsCmp = 4 * (N / 2) * (N / 2 + 1) + 1
-//        var oddUnitsCmp = 4 * (N+1)*(N+1)
-
-//        println("evenUnits: $oddUnits, evenUnitsCmp: $evenUnits")
-//        println("oddUnits: $evenUnits, oddUnitsCmp: $oddUnitsCmp")
-//        println("tot: ${oddUnits+evenUnits}, calc: ${2*N*(N+1) + 1}")
 
         val innerEvenCount = farm.countNodesAtDistance(130, 65, 65)
         val innerOddCount = farm.countNodesAtDistance(129, 65, 65)
         var sum = innerEvenCount*oddUnits + innerOddCount*evenUnits
 
-//        sum += (N - 1) * farm.countNodesAtDistance(130 + 65, 0, 0)
-//        sum += (N - 1) * farm.countNodesAtDistance(130 + 65, 0, 130)
-//        sum += (N - 1) * farm.countNodesAtDistance(130 + 65, 130, 130)
-//        sum += (N - 1) * farm.countNodesAtDistance(130 + 65, 130, 0)
-        val megaFarm = farm.toMegaFarm()
-        sum += (N - 1) * megaFarm.countNodesAtDistance(130 + 65, 0, 0)
-        sum += (N - 1) * megaFarm.countNodesAtDistance(130 + 65, 0, 131 * 3 - 1)
-        sum += (N - 1) * megaFarm.countNodesAtDistance(130 + 65, 131 * 3 - 1, 0)
-        sum += (N - 1) * megaFarm.countNodesAtDistance(130 + 65, 131 * 3 - 1, 131 * 3 - 1)
+        // TODO: write better comments to explain this...
+        val tripleFarmRow = farm.toTripleFarmRow()
+        sum += (N - 1) * tripleFarmRow.countNodesAtDistance(130 + 65, 0, 0) // south-east
+        sum += (N - 1) * tripleFarmRow.countNodesAtDistance(130 + 65, 0, 131 * 3 - 1) // south-west
+        sum += (N - 1) * tripleFarmRow.countNodesAtDistance(130 + 65, 130, 0) // north-east
+        sum += (N - 1) * tripleFarmRow.countNodesAtDistance(130 + 65, 130, 131 * 3 - 1) // north-west
 
-        sum += megaFarm.countNodesAtDistance(130, 0, 131 + 65) // Southernmost box
-        sum += megaFarm.countNodesAtDistance(130, 131*3 - 1, 131 + 65) // Northernmost box
-        sum += megaFarm.countNodesAtDistance(130, 131 + 65, 0) // Easternmost box
-        sum += megaFarm.countNodesAtDistance(130, 131 + 65, 131 * 3 - 1) // Westernmost box
+        sum += tripleFarmRow.countNodesAtDistance(130, 0, 131 + 65) // Southernmost box
+        sum += tripleFarmRow.countNodesAtDistance(130, 130, 131 + 65) // Northernmost box
+
+        sum += farm.countNodesAtDistance(130, 65, 0) // Easternmost box
+        sum += farm.countNodesAtDistance(130, 65, 130) // Westernmost box
 
         return sum.also { println(it) }
     }
