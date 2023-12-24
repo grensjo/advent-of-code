@@ -43,8 +43,21 @@ object Y2023D21 : Solution {
         private val numRows: Int = grid.size
         private val numCols: Int = grid[0].size
 
+        fun toMegaFarm() =
+            Farm(
+                buildList {
+                    for (r in 0 until numRows * 3) {
+                        add(buildList {
+                            for (c in 0 until numCols * 3) {
+                                add(grid[r % numRows][c % numCols])
+                            }
+                        })
+                    }
+                }
+            )
+
         fun countNodesAtDistance(distance: Int, startRow: Int? = null, startCol: Int? = null) : Int {
-            var currentNodes: Set<Node> = mutableSetOf()
+            var currentNodes: MutableSet<Node> = mutableSetOf()
             var nextNodes: MutableSet<Node> = mutableSetOf()
 
             if (startRow != null && startCol != null) {
@@ -101,20 +114,24 @@ object Y2023D21 : Solution {
 //        println("oddUnits: $evenUnits, oddUnitsCmp: $oddUnitsCmp")
 //        println("tot: ${oddUnits+evenUnits}, calc: ${2*N*(N+1) + 1}")
 
-        val innerEvenCount = farm.countNodesAtDistance(129, 65, 65)
-        val innerOddCount = farm.countNodesAtDistance(130, 65, 65)
+        val innerEvenCount = farm.countNodesAtDistance(130, 65, 65)
+        val innerOddCount = farm.countNodesAtDistance(129, 65, 65)
         var sum = innerEvenCount*oddUnits + innerOddCount*evenUnits
-//        var sum = innerEvenCount*evenUnits + innerOddCount*oddUnits
 
-        sum += farm.countNodesAtDistance(130, 65, 0)
-        sum += farm.countNodesAtDistance(130, 65, 130)
-        sum += farm.countNodesAtDistance(130, 0, 65)
-        sum += farm.countNodesAtDistance(130, 130, 65)
+//        sum += (N - 1) * farm.countNodesAtDistance(130 + 65, 0, 0)
+//        sum += (N - 1) * farm.countNodesAtDistance(130 + 65, 0, 130)
+//        sum += (N - 1) * farm.countNodesAtDistance(130 + 65, 130, 130)
+//        sum += (N - 1) * farm.countNodesAtDistance(130 + 65, 130, 0)
+        val megaFarm = farm.toMegaFarm()
+        sum += (N - 1) * megaFarm.countNodesAtDistance(130 + 65, 0, 0)
+        sum += (N - 1) * megaFarm.countNodesAtDistance(130 + 65, 0, 131 * 3 - 1)
+        sum += (N - 1) * megaFarm.countNodesAtDistance(130 + 65, 131 * 3 - 1, 0)
+        sum += (N - 1) * megaFarm.countNodesAtDistance(130 + 65, 131 * 3 - 1, 131 * 3 - 1)
 
-        sum += (N - 1) * farm.countNodesAtDistance(130, 0, 0)
-        sum += (N - 1) * farm.countNodesAtDistance(130, 0, 130)
-        sum += (N - 1) * farm.countNodesAtDistance(130, 130, 130)
-        sum += (N - 1) * farm.countNodesAtDistance(130, 130, 0)
+        sum += megaFarm.countNodesAtDistance(130, 0, 131 + 65) // Southernmost box
+        sum += megaFarm.countNodesAtDistance(130, 131*3 - 1, 131 + 65) // Northernmost box
+        sum += megaFarm.countNodesAtDistance(130, 131 + 65, 0) // Easternmost box
+        sum += megaFarm.countNodesAtDistance(130, 131 + 65, 131 * 3 - 1) // Westernmost box
 
         return sum.also { println(it) }
     }
