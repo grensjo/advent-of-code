@@ -2,6 +2,7 @@ package aockt.y2023
 
 import aockt.y2023.Y2023D20.Signal.*
 import io.github.jadarma.aockt.core.Solution
+import java.math.BigInteger
 import kotlin.math.sign
 
 object Y2023D20 : Solution {
@@ -78,54 +79,91 @@ object Y2023D20 : Solution {
 
     data class Simulation(val modules: Map<String, Module>) {
         val signalCounts = mutableMapOf(LOW to 0L, HIGH to 0L)
+        val history: MutableMap<String, MutableList<MutableList<Char>>> = mutableMapOf()
 
         init {
             for (module in modules.values) {
                 module.destinations.forEach { it -> modules[it]?.registerInput(module.label) }
             }
+            modules.keys.forEach {
+                history.putIfAbsent(it, mutableListOf())
+            }
         }
 
-        private fun simulationStep(checkForRx : Boolean = false, debuggingOutput : Boolean = false) : Boolean {
+        private fun simulationStep(checkForLabelHigh : String? = null) : Boolean {
+            var foundLabelHigh = false
             val pulseQueue: ArrayDeque<Pulse> = ArrayDeque()
             pulseQueue += Pulse.BUTTON_PULSE
 
-            while (pulseQueue.isNotEmpty()) {
-                val pulse = pulseQueue.removeFirst()
-                if (debuggingOutput) println(pulse)
-                if (pulse.to == "rx" && pulse.signal == LOW) return true
-                signalCounts.computeIfPresent(pulse.signal) { _, value -> value + 1L }
-
-                pulseQueue.addAll(modules[pulse.to]?.process(pulse) ?: listOf())
+            modules.keys.forEach {
+                history.getValue(it).add(mutableListOf())
             }
 
-            return false
+            while (pulseQueue.isNotEmpty()) {
+                val pulse = pulseQueue.removeFirst()
+                signalCounts.computeIfPresent(pulse.signal) { _, value -> value + 1L }
+
+                val toAdd = modules[pulse.to]?.process(pulse) ?: listOf()
+                if (checkForLabelHigh != null && toAdd.getOrNull(0)?.from == checkForLabelHigh) {
+                    if (toAdd[0].signal == HIGH) foundLabelHigh = true
+                }
+                pulseQueue.addAll(toAdd)
+            }
+
+            return foundLabelHigh
         }
 
         fun simulateFixedTimes(numButtonPresses: Int) : Long {
             for (i in 0 until numButtonPresses) {
-                simulationStep(debuggingOutput = i == 0)
+                simulationStep()
             }
-            println("${signalCounts[LOW]} low pulses, ${signalCounts[HIGH]} high pulses")
             return signalCounts.values.reduce(Long::times).also { println("$it\n\n") }
         }
 
-        fun simulateUntilRxLow() : Long {
-            var i = 0L
+        fun simulateToFindHighPeriod(label: String) : Long {
+            var step = 0L
+            var firstHighStep: Long? = null
 
             while (true) {
-                i++
-                if (i % 1000000L == 0L) println("${i / 1000000} million presses...")
-                if (simulationStep(checkForRx = true)) {
-                    println(i)
-                    return i
+                if (simulationStep(checkForLabelHigh = label)) {
+                    if (firstHighStep == null) {
+                        firstHighStep = step
+                    } else {
+                        return step - firstHighStep
+                    }
                 }
+                step++
             }
         }
+
     }
 
     private fun String.toSimulation() = Simulation(lineSequence().map { it.toModule() }.associateBy { it.label })
 
     override fun partOne(input: String) = input.toSimulation().simulateFixedTimes(1000)
 
-    override fun partTwo(input: String) = input.toSimulation().simulateUntilRxLow()
+    override fun partTwo(input: String): Long {
+        val sim = input.toSimulation()
+
+        // Assumptions about structure:
+        // - rx is the output of exactly one module, and that module is a conjunction.
+        // - The inputs to that conjunction turn HIGH with a fixed period, small enough to find the period length
+        //   through simulation.
+        val conjunctionLabel =
+            sim.modules.values.filter { "rx" in it.destinations }.also { assert(it.size == 1) }.first().label
+        val inputLabels = sim.modules.values.filter { conjunctionLabel in it.destinations }.map(Module::label)
+
+        // An extra assumption... the first time the inputs turn HIGH is after the same amount of steps as the period.
+        // That means we can just use lcm instead of the Chinese Remainder Theorem.
+        var ans = 1L
+        for (label in inputLabels) {
+            ans = ans.lcm(sim.simulateToFindHighPeriod(label))
+        }
+        return ans.also { println(it) }
+    }
 }
+
+private fun BigInteger.lcm(b: BigInteger) =
+    (this.abs() / this.gcd(b)) * b.abs()
+
+private fun Long.lcm(b: Long) = BigInteger.valueOf(this).lcm(BigInteger.valueOf(b)).toLong()
