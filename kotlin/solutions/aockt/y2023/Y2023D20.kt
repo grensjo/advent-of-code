@@ -78,15 +78,11 @@ object Y2023D20 : Solution {
     }
 
     data class Simulation(val modules: Map<String, Module>) {
-        val signalCounts = mutableMapOf(LOW to 0L, HIGH to 0L)
-        val history: MutableMap<String, MutableList<MutableList<Char>>> = mutableMapOf()
+        private val signalCounts = mutableMapOf(LOW to 0L, HIGH to 0L)
 
         init {
             for (module in modules.values) {
                 module.destinations.forEach { it -> modules[it]?.registerInput(module.label) }
-            }
-            modules.keys.forEach {
-                history.putIfAbsent(it, mutableListOf())
             }
         }
 
@@ -94,10 +90,6 @@ object Y2023D20 : Solution {
             var foundLabelHigh = false
             val pulseQueue: ArrayDeque<Pulse> = ArrayDeque()
             pulseQueue += Pulse.BUTTON_PULSE
-
-            modules.keys.forEach {
-                history.getValue(it).add(mutableListOf())
-            }
 
             while (pulseQueue.isNotEmpty()) {
                 val pulse = pulseQueue.removeFirst()
@@ -117,7 +109,7 @@ object Y2023D20 : Solution {
             for (i in 0 until numButtonPresses) {
                 simulationStep()
             }
-            return signalCounts.values.reduce(Long::times).also { println("$it\n\n") }
+            return signalCounts.values.reduce(Long::times).also { println("$it") }
         }
 
         fun simulateToFindHighPeriod(label: String) : Long {
