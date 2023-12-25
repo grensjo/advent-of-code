@@ -1,7 +1,7 @@
 # Advent of Code solutions
 ## Problems
 
-2023 - 39 x ⭐
+2023 - 46 x ⭐
 
 | Day |                                 Title                                  |                         Python                          |                        Kotlin                        | Stars |
 |:---:|:----------------------------------------------------------------------:|:-------------------------------------------------------:|:----------------------------------------------------:|:-----:|
@@ -28,3 +28,4 @@
 | 21  |          [Step Counter](https://adventofcode.com/2023/day/21)          |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D21.kt) |  ⭐⭐   |
 | 22  |           [Sand Slabs](https://adventofcode.com/2023/day/22)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D22.kt) |  ⭐⭐   |
 | 23  |          [A Long Walk](https://adventofcode.com/2023/day/23)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D23.kt) |   ⭐   |
+| 24  |     [Never Tell Me The Odds](https://adventofcode.com/2023/day/24)     |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D24.kt) |  ⭐⭐   |
