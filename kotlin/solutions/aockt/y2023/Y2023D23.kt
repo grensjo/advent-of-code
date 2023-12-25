@@ -43,18 +43,22 @@ object Y2023D23 : Solution {
         private val numCols = grid[0].size
 
         // Brute-forces the longest path by recursing for every direction choice.
-        fun getLongestPath(): Int {
-            val path: MutableList<Point> = mutableListOf()
+        fun getLongestPath(ignoreSlopes: Boolean = false): Int {
+            val path: MutableSet<Point> = mutableSetOf()
+            val cache: MutableMap<Pair<Point, Set<Point>>, Int> = mutableMapOf()
 
             fun recurse(start: Point) : Int {
+                if ((start to path) in cache) {
+                    return cache.getValue(start to path)
+                }
                 var current: Point? = start
-                var nToRemove = 0
+                val toRemove: MutableSet<Point> = mutableSetOf()
                 var best = 0
 
+
                 while (current != null) {
-                    assert (current !in path) { "There is a cycle in the path $path." }
-                    path.add(current)
-                    nToRemove++
+                    path += current
+                    toRemove += current
 
                     if (current == Point(numRows - 1, numCols - 2)) {
                         // We have reached the goal, see if this is longer than the longest known path.
@@ -62,12 +66,12 @@ object Y2023D23 : Solution {
                         break
                     }
 
-                    val neighbours = current.getNeighbours(numRows, numCols, grid[current].toDirection())
+                    val neighbours = current.getNeighbours(numRows, numCols, if (!ignoreSlopes) grid[current].toDirection() else null)
 
                     val toRecurse: MutableSet<Point> = mutableSetOf()
                     for (next in neighbours) {
-                        if (path.size > 1 && next == path[path.size - 2]) continue
                         if (grid[next] == '#') continue
+                        if (next in path) continue
                         toRecurse += next
                     }
 
@@ -85,7 +89,8 @@ object Y2023D23 : Solution {
 
                 }
 
-                (0 until nToRemove).forEach { _ -> path.removeLast() }
+                path.removeAll(toRemove)
+                cache[start to path] = best
                 return best
             }
 
@@ -95,12 +100,14 @@ object Y2023D23 : Solution {
     }
 
     override fun partOne(input: String) : Int {
-        return input.toMaze().getLongestPath()
+        return input.toMaze().getLongestPath().also { println(it) }
+    }
+
+    override fun partTwo(input: String) : Int {
+        return input.toMaze().getLongestPath(ignoreSlopes = true).also { println(it) }
     }
 
     private fun String.toMaze() = Maze(lineSequence().map { it.toList() }.toList())
-
-//    override fun partTwo(input: String) = input.length
 }
 
 

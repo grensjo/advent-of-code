@@ -5,8 +5,7 @@ import io.github.jadarma.aockt.test.AdventSpec
 
 @AdventDay(2023, 23, "A Long Walk")
 class Y2023D23Test : AdventSpec<Y2023D23>({
-
-    partOne {
+    val exampleInput =
         """
             #.#####################
             #.......#########...###
@@ -31,13 +30,14 @@ class Y2023D23Test : AdventSpec<Y2023D23>({
             #.###.###.#.###.#.#v###
             #.....###...###...#...#
             #####################.#
-        """.trimIndent() shouldOutput 94
+        """.trimIndent()
+
+    partOne {
+        exampleInput shouldOutput 94
     }
 
-//    partTwo {
-//        """
-//            a
-//        """.trimIndent() shouldOutput 1
-//    }
+    partTwo {
+        exampleInput shouldOutput 154
+    }
 
 })
