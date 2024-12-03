@@ -1,7 +1,19 @@
 # Advent of Code solutions
 ## Problems
 
-2023 - 50 x ⭐
+<details open>
+    <summary>2024 - 6 x ⭐</summary>
+
+| Day |                           Title                           | Python |                        Kotlin                        | Stars |
+|:---:|:---------------------------------------------------------:|:------:|:----------------------------------------------------:|:-----:|
+| 01  | [Historian Hysteria](https://adventofcode.com/2024/day/1) |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D01.kt) |  ⭐⭐   |
+| 01  | [Red-Nosed Reports](https://adventofcode.com/2024/day/2)  |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D02.kt) |  ⭐⭐   |
+| 01  |    [Mull It Over](https://adventofcode.com/2024/day/3)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D03.kt) |  ⭐⭐   |
+
+</details>
+
+<details>
+    <summary>2023 - 50 x ⭐</summary>
 
 | Day |                                 Title                                  |                         Python                          |                        Kotlin                        | Stars |
 |:---:|:----------------------------------------------------------------------:|:-------------------------------------------------------:|:----------------------------------------------------:|:-----:|
@@ -30,3 +42,5 @@
 | 23  |          [A Long Walk](https://adventofcode.com/2023/day/23)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D23.kt) |  ⭐⭐   |
 | 24  |     [Never Tell Me The Odds](https://adventofcode.com/2023/day/24)     |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D24.kt) |  ⭐⭐   |
 | 25  |          [Snowverload](https://adventofcode.com/2023/day/25)           |                           n/a                           | [Solution](kotlin/solutions/aockt/y2023/Y2023D25.kt) |  ⭐⭐   |
+
+</details>
