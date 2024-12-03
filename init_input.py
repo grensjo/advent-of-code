@@ -37,22 +37,22 @@ def fix_file(year: int, day: int, part: int | None = None):
     kotlin_path = get_kotlin_path(year, day, part)
 
     if path.exists() and kotlin_path.exists():
-        click.echo("({year}, {day}, {part}) already exists in both places.")
+        click.echo(f"({year}, {day}, {part}) already exists in both places.")
     elif path.exists() and not kotlin_path.exists():
         create_symlink(kotlin_path, path)
-        click.echo("({year}, {day}, {part}): created symlink in Kotlin directory.")
+        click.echo(f"({year}, {day}, {part}): created symlink in Kotlin directory.")
     elif not path.exists() and kotlin_path.exists():
         shutil.move(kotlin_path, path)
         create_symlink(kotlin_path, path)
-        click.echo("({year}, {day}, {part}): moved file in Kotlin directory and replaced with symlink.")
+        click.echo(f"({year}, {day}, {part}): moved file in Kotlin directory and replaced with symlink.")
     else:
         if part is None:
             if download_input(year, day):
                 shutil.move(get_tmp_path(), path)
                 create_symlink(kotlin_path, path)
-                click.echo("({year}, {day}, {part}): downloaded input and created symlink.")
+                click.echo(f"({year}, {day}, {part}): downloaded input and created symlink.")
             else:
-                click.echo("({year}, {day}, {part}): error, input download failed.")
+                click.echo(f"({year}, {day}, {part}): error, input download failed.")
         else:
             ans = click.prompt(f'Answer for {year} day {day} part {part}')
             with open(path, 'w') as f:
