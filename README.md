@@ -9,6 +9,7 @@
 | 01  | [Historian Hysteria](https://adventofcode.com/2024/day/1) |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D01.kt) |  ⭐⭐   |
 | 02  | [Red-Nosed Reports](https://adventofcode.com/2024/day/2)  |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D02.kt) |  ⭐⭐   |
 | 03  |    [Mull It Over](https://adventofcode.com/2024/day/3)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D03.kt) |  ⭐⭐   |
+| 04  |    [Ceres Search](https://adventofcode.com/2024/day/4)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D04.kt) |  ⭐⭐   |
 
 </details>
 
