@@ -2,7 +2,7 @@
 ## Problems
 
 <details open>
-    <summary>2024 - 6 x ⭐</summary>
+    <summary>2024 - 10 x ⭐</summary>
 
 | Day |                           Title                           | Python |                        Kotlin                        | Stars |
 |:---:|:---------------------------------------------------------:|:------:|:----------------------------------------------------:|:-----:|
@@ -10,6 +10,7 @@
 | 02  | [Red-Nosed Reports](https://adventofcode.com/2024/day/2)  |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D02.kt) |  ⭐⭐   |
 | 03  |    [Mull It Over](https://adventofcode.com/2024/day/3)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D03.kt) |  ⭐⭐   |
 | 04  |    [Ceres Search](https://adventofcode.com/2024/day/4)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D04.kt) |  ⭐⭐   |
+| 05  |    [Print Queue](https://adventofcode.com/2024/day/5)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D05.kt) |  ⭐⭐   |
 
 </details>
 
