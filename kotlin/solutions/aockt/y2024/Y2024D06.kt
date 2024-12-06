@@ -21,8 +21,10 @@ object Y2024D06 : Solution {
         SOUTH(1, 0),
         WEST(0, -1),
     }
+
     private val charToDirection: Map<Char, Direction> =
         mapOf('^' to NORTH, '>' to EAST, 'v' to SOUTH, '>' to WEST)
+
     private fun Direction.nextClockwise() =
             when(this) {
                 NORTH -> EAST
@@ -32,10 +34,10 @@ object Y2024D06 : Solution {
             }
 
     private data class GuardState(val pos: Point, val dir: Direction) {
-        fun nextState(grid: Grid): GuardState {
+        fun nextState(grid: Grid, extraObstacle: Point? = null): GuardState {
             var nextDir = dir
             var nextPos = pos + dir
-            while (grid[nextPos] == '#') {
+            while (grid[nextPos] == '#' || nextPos == extraObstacle) {
                 nextDir = nextDir.nextClockwise()
 
                 if (nextDir == dir) {
@@ -67,24 +69,49 @@ object Y2024D06 : Solution {
         throw IllegalArgumentException("There was no guard start point in the input.")
     }
 
-    override fun partOne(input: String): Int {
-        val (grid, initialGuardState) = parseInput(input)
-
+    /** Returns a pair of Boolean and Int -- whether the guard entered a loop, and how many positions she visited. */
+    private fun simulateGuard(initialGuardState: GuardState, grid: Grid, extraObstacle: Point? = null): Pair<Boolean, Int> {
         var guardState = initialGuardState
         val visitedPoints: MutableSet<Point> = mutableSetOf()
         val visitedStates: MutableSet<GuardState> = mutableSetOf()
 
+        // Loop as long as the guard stays within the grid.
         while (grid[guardState.pos] != null) {
             if (guardState in visitedStates) {
-                throw RuntimeException("Encountered a loop after visiting ${visitedStates.size} states and ${visitedPoints} points.")
+                // We found a loop.
+                return true to visitedPoints.size
             }
             visitedStates.add(guardState)
             visitedPoints.add(guardState.pos)
-            guardState = guardState.nextState(grid)
+            guardState = guardState.nextState(grid, extraObstacle)
         }
 
-        return visitedPoints.size.also { println(it) }
+        // No loop was found.
+        return false to visitedPoints.size
     }
 
-//    override fun partTwo(input: String) = input.length
+    override fun partOne(input: String): Int {
+        val (grid, initialGuardState) = parseInput(input)
+        val (enteredLoop, numVisited) = simulateGuard(initialGuardState, grid)
+        if (enteredLoop) { throw RuntimeException("The guard entered a loop in part 1.") }
+        return numVisited.also { println(it) }
+    }
+
+    override fun partTwo(input: String): Int {
+        val (grid, initialGuardState) = parseInput(input)
+        var obstacleOptionCount = 0
+
+        // Loop over possible extra obstacle positions, and simulate the guard for each such position.
+        for (i in 0..<grid.h) {
+            for (j in 0..<grid.w) {
+                val p = Point(i, j)
+                if (grid[p]=='.') {
+                    val (enteredLoop, _) = simulateGuard(initialGuardState, grid, extraObstacle = p)
+                    if (enteredLoop) { obstacleOptionCount++ }
+                }
+            }
+        }
+
+        return obstacleOptionCount.also { println(it) }
+    }
 }
