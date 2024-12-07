@@ -12,6 +12,7 @@
 | 04  |    [Ceres Search](https://adventofcode.com/2024/day/4)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D04.kt) |  ⭐⭐   |
 | 05  |    [Print Queue](https://adventofcode.com/2024/day/5)     |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D05.kt) |  ⭐⭐   |
 | 06  |  [Guard Gallivant](https://adventofcode.com/2024/day/6)   |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D06.kt) |  ⭐⭐   |
+| 07  |   [Bridge Repair](https://adventofcode.com/2024/day/7)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D07.kt) |  ⭐⭐   |
 
 </details>
 

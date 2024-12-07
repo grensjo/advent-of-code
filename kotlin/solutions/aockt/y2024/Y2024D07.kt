@@ -1,5 +1,7 @@
 package aockt.y2024
 
+import aockt.y2024.Y2024D07.Operator.*
+import aockt.y2024.Y2024D07.toEquation
 import io.github.jadarma.aockt.core.Solution
 
 object Y2024D07 : Solution {
@@ -12,47 +14,49 @@ object Y2024D07 : Solution {
         )
     }
 
-    private class BitMask(val size: Int, val bitmask: Long = 0L) {
-        operator fun get(pos: Int): Boolean =
-            ((bitmask shr pos) and 1L) > 0L
-
-        fun next(): BitMask = BitMask(size, bitmask + 1L)
-        fun hasNext() = (bitmask + 1L) < (1L shl size)
+    enum class Operator {
+        PLUS,
+        TIMES,
+        CONCAT,
     }
+    private val partOneOperators = listOf(PLUS, TIMES)
+    private val partTwoOperators = Operator.entries
 
     private data class Equation(val terms: List<Long>, val testValue: Long) {
-        fun test(operators: BitMask): Boolean {
-            assert(operators.size == terms.size - 1)
+        fun computeRecursive(partialResult: Long, nextIndex: Int, nextOperator: Operator, operators: List<Operator>): Boolean {
+            val newPartialResult = when (nextOperator) {
+                PLUS -> partialResult + terms[nextIndex]
+                TIMES -> partialResult * terms[nextIndex]
+                CONCAT -> (partialResult.toString() + terms[nextIndex].toString()).toLong()
+            }
 
-            var result = terms.first()
-            for ((i, term) in terms.drop(1).withIndex()) {
-                when (operators[i]) {
-                    false -> result += term
-                    true -> result *= term
+            if (nextIndex == terms.size - 1) {
+                // We have computed the entire expression, let's see if we were successful!
+                return (newPartialResult == testValue)
+            }
+
+            for (op in operators) {
+                if (computeRecursive(newPartialResult, nextIndex + 1, op, operators)) {
+                    return true
                 }
             }
 
-            return result == testValue
+            // None of the recursive calls resulted in a valid result.
+            return false
         }
 
-        fun couldBeValid(): Boolean {
-            var operators = BitMask(terms.size - 1)
+        fun couldBeValid(operators: List<Operator>): Boolean =
+            operators.any { it -> computeRecursive(terms.first(), 1, it, operators) }
 
-            while (true) {
-                if (test(operators)) { return true }
-
-                if (operators.hasNext()) {
-                    operators = operators.next()
-                } else {
-                    return false
-                }
-            }
-        }
     }
 
-    override fun partOne(input: String) : Long =
-        input.lines().map { it.toEquation() }.filter { it.couldBeValid() }.sumOf { it.testValue }
+    private fun solve(input: String, operators: List<Operator>): Long =
+        input.lines().map { it.toEquation() }.filter { it.couldBeValid(operators) }.sumOf { it.testValue }
             .also { println(it) }
 
-//    override fun partTwo(input: String) = input.length
+    override fun partOne(input: String) : Long =
+        solve(input, partOneOperators)
+
+    override fun partTwo(input: String) : Long =
+        solve(input, partTwoOperators)
 }
