@@ -3,7 +3,7 @@ package aockt.y2024
 import io.github.jadarma.aockt.core.Solution
 
 object Y2024D12 : Solution {
-    private data class Grid(val h: Int, val w: Int, val grid: List<List<Char>>) {
+    private class Grid(val h: Int, val w: Int, val grid: List<List<Char>>) {
         operator fun get(p: Point): Char? {
             return grid.getOrNull(p.i)?.getOrNull(p.j)
         }
@@ -17,14 +17,53 @@ object Y2024D12 : Solution {
                 }
             }
 
-        fun computeCost(): Long {
+        class AreaInfo(var area: Long = 0L, var perimiterLength: Long = 0L, var perimiterCount: Long = 0L)
+        val areaInfos: MutableList<AreaInfo> = mutableListOf()
+        val pointToAreaId: MutableMap<Point, Int> = mutableMapOf()
+
+        fun computeNumPerimetersForRowOrCol(rowOrCol: List<Point>, perimiterDirection: Direction) {
+            var active = false
+            for ((i, p) in rowOrCol.withIndex()) {
+                if (this[p + perimiterDirection] == this[p]) {
+                    // Not a perimiter.
+                    active = false
+                    continue
+                }
+                if (i > 0 && this[p] != this[rowOrCol[i-1]]) {
+                    // We went into a different area, any previous perimeter is no longer active.
+                    active = false
+                }
+                // We are on a perimiter.
+                if (!active) {
+                    // We are on a new perimeter.
+                    areaInfos[pointToAreaId[p]!!].perimiterCount++
+                    active = true
+                }
+            }
+        }
+
+        fun computeNumPerimeters() {
+            // Row by row
+            for (i in 0..<h) {
+                computeNumPerimetersForRowOrCol((0..<w).map { Point(i, it) }, Direction.NORTH)
+                computeNumPerimetersForRowOrCol((0..<w).map { Point(i, it) }, Direction.SOUTH)
+            }
+            // Col by col
+            for (i in 0..<w) {
+                computeNumPerimetersForRowOrCol((0..<h).map { Point(it, i) }, Direction.EAST)
+                computeNumPerimetersForRowOrCol((0..<h).map { Point(it, i) }, Direction.WEST)
+            }
+        }
+
+        fun computeAreas() {
             val visited: MutableSet<Point> = mutableSetOf()
-            var cost = 0L
 
             for (startPoint in getAllCoords()) {
                 if (startPoint in visited) { continue }
-                var perimiter = 0L
-                var area = 0L
+                val areaId = areaInfos.size
+                val areaInfo = AreaInfo()
+                areaInfos.add(areaInfo)
+
                 val queue: ArrayDeque<Point> = ArrayDeque()
                 queue.add(startPoint)
 
@@ -32,8 +71,9 @@ object Y2024D12 : Solution {
                     val current = queue.removeFirst()
                     if (current in visited) { continue }
                     visited.add(current)
+                    pointToAreaId[current] = areaId
 
-                    area++
+                    areaInfo.area++
                     for (d in Direction.entries) {
                         val next = current + d
 
@@ -42,15 +82,11 @@ object Y2024D12 : Solution {
                                 queue.add(next)
                             }
                         } else {
-                            perimiter++
+                            areaInfo.perimiterLength++
                         }
                     }
                 }
-
-                cost += (perimiter * area)
             }
-
-            return cost
         }
     }
 
@@ -76,8 +112,16 @@ object Y2024D12 : Solution {
 
     override fun partOne(input: String): Long {
         val grid = parseInput(input)
-        return grid.computeCost().also { println(it) }
+        grid.computeAreas()
+        return grid.areaInfos.sumOf { it.area * it.perimiterLength }
+            .also { println(it) }
     }
 
-//    override fun partTwo(input: String) = input.length
+    override fun partTwo(input: String): Long {
+        val grid = parseInput(input)
+        grid.computeAreas()
+        grid.computeNumPerimeters()
+        return grid.areaInfos.sumOf { it.area * it.perimiterCount }
+            .also { println(it) }
+    }
 }

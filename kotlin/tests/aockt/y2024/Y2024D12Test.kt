@@ -3,7 +3,7 @@ package aockt.y2024
 import io.github.jadarma.aockt.test.AdventDay
 import io.github.jadarma.aockt.test.AdventSpec
 
-@AdventDay(2024, 12, "TODO")
+@AdventDay(2024, 12, "Garden Groups")
 class Y2024D12Test : AdventSpec<Y2024D12>({
 
     partOne {
@@ -36,10 +36,30 @@ class Y2024D12Test : AdventSpec<Y2024D12>({
         """.trimIndent() shouldOutput 1930
     }
 
-//    partTwo {
-//        """
-//            a
-//        """.trimIndent() shouldOutput 1
-//    }
+    partTwo {
+        """
+            AAAA
+            BBCD
+            BBCC
+            EEEC
+        """.trimIndent() shouldOutput 80
+
+        """
+            EEEEE
+            EXXXX
+            EEEEE
+            EXXXX
+            EEEEE
+        """.trimIndent() shouldOutput 236
+
+        """
+            AAAAAA
+            AAABBA
+            AAABBA
+            ABBAAA
+            ABBAAA
+            AAAAAA
+        """.trimIndent() shouldOutput 368
+    }
 
 })
