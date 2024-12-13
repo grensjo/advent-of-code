@@ -14,6 +14,11 @@
 | 06  |    [Guard Gallivant](https://adventofcode.com/2024/day/6)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D06.kt) |  ⭐⭐   |
 | 07  |     [Bridge Repair](https://adventofcode.com/2024/day/7)     |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D07.kt) |  ⭐⭐   |
 | 08  | [Resonant Collinearity](https://adventofcode.com/2024/day/8) |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D08.kt) |  ⭐⭐   |
+| 09  |    [Disk Fragmenter](https://adventofcode.com/2024/day/9)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D09.kt) |  ⭐⭐   |
+| 10  |       [Hoof It](https://adventofcode.com/2024/day/10)        |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D10.kt) |  ⭐⭐   |
+| 11  |  [Plutonian Pebbles](https://adventofcode.com/2024/day/11)   |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D11.kt) |  ⭐⭐   |
+| 12  |    [Garden Groups](https://adventofcode.com/2024/day/12)     |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D12.kt) |  ⭐⭐   |
+| 13  |   [Claw Contraption](https://adventofcode.com/2024/day/13)   |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D13.kt) |  ⭐⭐   |
 
 </details>
 
