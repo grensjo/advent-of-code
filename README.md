@@ -19,6 +19,7 @@
 | 11  |  [Plutonian Pebbles](https://adventofcode.com/2024/day/11)   |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D11.kt) |  ⭐⭐   |
 | 12  |    [Garden Groups](https://adventofcode.com/2024/day/12)     |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D12.kt) |  ⭐⭐   |
 | 13  |   [Claw Contraption](https://adventofcode.com/2024/day/13)   |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D13.kt) |  ⭐⭐   |
+| 13  |   [Restroom Redoubt](https://adventofcode.com/2024/day/14)   |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D14.kt) |  ⭐⭐   |
 
 </details>
 
