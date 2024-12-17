@@ -18,62 +18,34 @@ private enum class Instruction(val opcode: Int) {
 }
 private fun Int.toInstruction() = Instruction.opcodeToInstruction[this]!!
 
-private data class State(var a: Long, var b: Long, var c: Long)
-
-private sealed class ComboOperand {
-    abstract fun getValue(state: State): Long
-}
-
-private data class LiteralOperand(val literal: Int) : ComboOperand() {
-    init {
-        assert(literal in 0..7)
-    }
-    override fun getValue(state: State): Long = literal.toLong()
-}
-
-private enum class Register { A, B, C }
-
-private data class RegisterOperand(val operand: Int) : ComboOperand() {
-    val register = when (operand) {
-        4 -> Register.A
-        5 -> Register.B
-        6 -> Register.C
-        else -> throw IllegalArgumentException()
-    }
-
-    override fun getValue(state: State): Long =
-        when (register) {
-            Register.A -> state.a
-            Register.B -> state.b
-            Register.C -> state.c
-        }
-
-    override fun toString(): String {
-        return "RegisterOperand(${register})"
-    }
-}
-
-private data object LegacyOperand: ComboOperand() {
-    override fun getValue(state: State): Long = throw AssertionError("Tried to get value of legacy operand.")
-}
-
-private fun Int.toComboOperand(): ComboOperand =
-    when (this) {
-        in 0..3 -> LiteralOperand(this)
-        in 4..6 -> RegisterOperand(this)
-        7 -> LegacyOperand
-        else -> throw IllegalArgumentException("operand not in range 0..7")
-    }
-
-private fun Int.toLiteralOperand(): LiteralOperand =
-    when (this) {
-        in 0..7 -> LiteralOperand(this)
-        else -> throw IllegalArgumentException("operand not in range 0..7")
-    }
-
-private class Program(val state: State, val programCode: List<Int>) {
+private class Program(val programCode: List<Int>, var a: Long, var b: Long, var c: Long) {
     var pointer: Int = 0
     var output: MutableList<Int> = mutableListOf()
+
+    private data class LiteralOperand(val literal: Int) {
+        init {
+            assert(literal in 0..7)
+        }
+        fun getValue(): Long = literal.toLong()
+    }
+
+    private inner class ComboOperand(val operand: Int) {
+        fun getValue(): Long =
+            when (operand) {
+                in 0..3 -> operand.toLong()
+                4 -> a
+                5 -> b
+                6 -> c
+                else -> throw IllegalArgumentException("operand out of bounds")
+            }
+
+        override fun toString(): String {
+            return "ComboOperand(${operand})"
+        }
+    }
+
+    private fun Int.toLiteralOperand() = LiteralOperand(this)
+    private fun Int.toComboOperand() = ComboOperand(this)
 
     fun step(): Boolean {
         if (pointer + 1 >= programCode.size) {
@@ -86,59 +58,59 @@ private class Program(val state: State, val programCode: List<Int>) {
                 // Integer division of A by 2 to the power of the _combo_ operand, stored in A.
                 // A = A / 2^operand
                 val operand = programCode[pointer + 1].toComboOperand()
-                val exponent = operand.getValue(state)
+                val exponent = operand.getValue()
                 assert(exponent <= Int.MAX_VALUE) // fix if this happens
-                state.a = state.a shr exponent.toInt()
+                a = a shr exponent.toInt()
             }
 
             Instruction.BXL -> {
                 // B xor literal, stored in B
                 // B = B xor literal
                 val operand = programCode[pointer + 1].toLiteralOperand()
-                state.b = state.b xor operand.getValue(state)
+                b = b xor operand.getValue()
             }
 
             Instruction.BST -> {
                 // Writes the combo operand mod 8 to B
                 // B = operand % 8
                 val operand = programCode[pointer + 1].toComboOperand()
-                state.b = operand.getValue(state) % 8
+                b = operand.getValue() % 8
             }
 
             Instruction.JNZ -> {
-                if (state.a != 0L) {
+                if (a != 0L) {
                     val operand = programCode[pointer + 1].toLiteralOperand()
-                    pointer = operand.getValue(state).toInt() - 2
+                    pointer = operand.getValue().toInt() - 2
                 }
             }
 
             Instruction.BXC -> {
                 // B xor C, stored in B (operand ignored)
                 // B = B xor C
-                state.b = state.b xor state.c
+                b = b xor c
             }
 
             Instruction.OUT -> {
                 val operand = programCode[pointer + 1].toComboOperand()
-                output.add((operand.getValue(state) % 8).toInt())
+                output.add((operand.getValue() % 8).toInt())
             }
 
             Instruction.BDV -> {
                 // Integer division of A by 2 to the power of the operand, stored in B.
                 // B = A / 2^operand
                 val operand = programCode[pointer + 1].toComboOperand()
-                val exponent = operand.getValue(state)
+                val exponent = operand.getValue()
                 assert(exponent <= Int.MAX_VALUE) // fix if this happens
-                state.b = state.a shr exponent.toInt()
+                b = a shr exponent.toInt()
             }
 
             Instruction.CDV -> {
                 // Integer division of A by 2 to the power of the operand, stored in C.
                 // C = A / 2^operand
                 val operand = programCode[pointer + 1].toComboOperand()
-                val exponent = operand.getValue(state)
+                val exponent = operand.getValue()
                 assert(exponent <= Int.MAX_VALUE) // fix if this happens
-                state.c = state.a shr exponent.toInt()
+                c = a shr exponent.toInt()
             }
         }
 
@@ -146,8 +118,13 @@ private class Program(val state: State, val programCode: List<Int>) {
         return true
     }
 
+    fun run(): List<Int> {
+        while(step()) {}
+        return output
+    }
+
     fun print() {
-        println(state)
+        println("a=$a, b=$b, c=$c")
         println(programCode)
         println("Output so far: ${output}")
         println("pointer: ${pointer}")
@@ -170,23 +147,24 @@ object Y2024D17 : Solution {
         val b = lines[1].split(" ").last().toLong()
         val c = lines[2].split(" ").last().toLong()
         val instructions = lines[4].split(" ").last().split(",").map(String::toInt)
-        return Program(State(a, b, c), instructions)
+        return Program(instructions, a, b, c)
     }
 
     override fun partOne(input: String): String {
         val program = parseInput(input)
-        program.print()
-
-        while (program.step()) {
-            program.print()
-        }
-
-        return program.output.joinToString(separator=",").also { println(it) }
+        return program.run().joinToString(separator=",").also { println(it) }
     }
 
     override fun partTwo(input: String): Long {
         val originalProgram = parseInput(input)
 
+        // I'm sorry, but the following probably doesn't make much sense if you haven't already solved the problem in a
+        // similar way. A proper write-up is likely needed...
+        //
+        // We compute the initial value of A by choosing three bits at a time, such that the desired piece of code will
+        // be output. The behavior of the program depends on more significant bits but not less, so we do it backwards.
+        // If we paint ourselves into a corner we can backtrack and make another choice earlier. The search can be seen
+        // as a dfs on the tree of possible choices for bit triplets in A.
         fun dfs(codeIndexToOutput: Int, prevA: Long): Long? {
             if (codeIndexToOutput == -1) { return prevA }
 
@@ -196,14 +174,13 @@ object Y2024D17 : Solution {
             for (nextThreeBits in 0L..7L) {
                 val currentAToTest = currentA or nextThreeBits
                 val programToTest = Program(
-                    State(currentAToTest, originalProgram.state.b, originalProgram.state.c),
-                    originalProgram.programCode)
-                while (programToTest.step()) {}
-                if (programToTest.output.first().toInt() == outputToTrigger) {
-                    // Success!
-                    println("$codeIndexToOutput - targetCode: ${outputToTrigger}, nextThreeBits: ${nextThreeBits}, output was: ${programToTest.output.first()}")
+                    originalProgram.programCode, currentAToTest, originalProgram.b, originalProgram.c)
+                val output = programToTest.run()
+                if (output.first() == outputToTrigger) {
+                    // Success for this step! Recurse.
                     val finalA = dfs(codeIndexToOutput - 1, currentAToTest)
                     if (finalA != null) {
+                        // We found a valid leaf node!
                         return finalA
                     }
                 }
@@ -211,13 +188,13 @@ object Y2024D17 : Solution {
 
             // This branch was bad - no solution was found.
             return null
-
         }
+
         val finalA = dfs(originalProgram.programCode.size - 1, 0)!!
 
-        originalProgram.state.a = finalA
-        while (originalProgram.step()) {}
-        assert(originalProgram.output == originalProgram.programCode)
+        // Validate the solution.
+        originalProgram.a = finalA
+        assert(originalProgram.run() == originalProgram.programCode)
 
         return finalA.also { println(finalA) }
     }
