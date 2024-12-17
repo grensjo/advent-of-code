@@ -73,7 +73,7 @@ private fun Int.toLiteralOperand(): LiteralOperand =
 
 private class Program(val state: State, val programCode: List<Int>) {
     var pointer: Int = 0
-    var output: MutableList<Long> = mutableListOf()
+    var output: MutableList<Int> = mutableListOf()
 
     fun step(): Boolean {
         if (pointer + 1 >= programCode.size) {
@@ -120,7 +120,7 @@ private class Program(val state: State, val programCode: List<Int>) {
 
             Instruction.OUT -> {
                 val operand = programCode[pointer + 1].toComboOperand()
-                output.add(operand.getValue(state) % 8)
+                output.add((operand.getValue(state) % 8).toInt())
             }
 
             Instruction.BDV -> {
@@ -149,11 +149,14 @@ private class Program(val state: State, val programCode: List<Int>) {
     fun print() {
         println(state)
         println(programCode)
+        println("Output so far: ${output}")
         println("pointer: ${pointer}")
         if (pointer + 1 < programCode.size) {
+            println()
             println("Next instruction: ${programCode[pointer].toInstruction()}(${programCode[pointer+1].toComboOperand()})")
         }
         else {
+            println()
             println("No more instructions.")
         }
         println()
@@ -181,5 +184,41 @@ object Y2024D17 : Solution {
         return program.output.joinToString(separator=",").also { println(it) }
     }
 
-//    override fun partTwo(input: String) = input.length
+    override fun partTwo(input: String): Long {
+        val originalProgram = parseInput(input)
+
+        fun dfs(codeIndexToOutput: Int, prevA: Long): Long? {
+            if (codeIndexToOutput == -1) { return prevA }
+
+            val outputToTrigger = originalProgram.programCode[codeIndexToOutput]
+            val currentA = prevA shl 3
+
+            for (nextThreeBits in 0L..7L) {
+                val currentAToTest = currentA or nextThreeBits
+                val programToTest = Program(
+                    State(currentAToTest, originalProgram.state.b, originalProgram.state.c),
+                    originalProgram.programCode)
+                while (programToTest.step()) {}
+                if (programToTest.output.first().toInt() == outputToTrigger) {
+                    // Success!
+                    println("$codeIndexToOutput - targetCode: ${outputToTrigger}, nextThreeBits: ${nextThreeBits}, output was: ${programToTest.output.first()}")
+                    val finalA = dfs(codeIndexToOutput - 1, currentAToTest)
+                    if (finalA != null) {
+                        return finalA
+                    }
+                }
+            }
+
+            // This branch was bad - no solution was found.
+            return null
+
+        }
+        val finalA = dfs(originalProgram.programCode.size - 1, 0)!!
+
+        originalProgram.state.a = finalA
+        while (originalProgram.step()) {}
+        assert(originalProgram.output == originalProgram.programCode)
+
+        return finalA.also { println(finalA) }
+    }
 }

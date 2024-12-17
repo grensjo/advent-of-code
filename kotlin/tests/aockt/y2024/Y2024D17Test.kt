@@ -32,10 +32,7 @@ class Y2024D17Test : AdventSpec<Y2024D17>({
         """.trimIndent() shouldOutput "4,6,3,5,6,3,5,2,1,0"
     }
 
-//    partTwo {
-//        """
-//            a
-//        """.trimIndent() shouldOutput 1
-//    }
+    partTwo {
+    }
 
 })
