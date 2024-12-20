@@ -2,6 +2,7 @@ package aockt.y2024
 
 import io.github.jadarma.aockt.core.Solution
 import aockt.y2024.Y2024D20.Direction.*
+import kotlin.math.abs
 
 object Y2024D20 : Solution {
     private data class Point(val i: Int, val j: Int) {
@@ -9,6 +10,7 @@ object Y2024D20 : Solution {
         operator fun plus(d: Direction) = next(d)
         operator fun plus(p: Point) = Point(i + p.i, j + p.j)
         operator fun minus(p: Point) = Point(i - p.i, j - p.j)
+        fun manhattanDistance(p: Point) = abs(i - p.i) + abs(j - p.j)
     }
 
     private enum class Direction(val di: Int, val dj: Int) {
@@ -59,7 +61,7 @@ object Y2024D20 : Solution {
             return visited
         }
 
-        fun getCheats(): Map<Int, Int> {
+        fun getCheats(maxCheatTime: Int): Map<Int, Int> {
             val distFromStart = getShortestPathsFrom(start)
             val distFromEnd = getShortestPathsFrom(end)
             val distNoCheating = distFromStart[end]!!
@@ -69,23 +71,23 @@ object Y2024D20 : Solution {
 
             fun calculateCheat(p1: Point, p2: Point): Int? {
                 if (hasPoint(p1) && hasPoint(p2) && this[p1] != '#' && this[p2] != '#') {
-                    val newDist = distFromStart[p1]!! + 2 + distFromEnd[p2]!!
+                    val newDist = distFromStart[p1]!! + p1.manhattanDistance(p2) + distFromEnd[p2]!!
                     if (newDist < distNoCheating) { return newDist }
                 }
                 return null
             }
 
-            for (p in getAllCoords()) {
-                if (this[p] != '#') { continue }
+            for (p1 in getAllCoords()) {
+                if (this[p1] == '#') { continue }
+                for (p2 in getAllCoords()) {
+                    if (this[p2] == '#') { continue }
+                    val cheatLength = p1.manhattanDistance(p2)
+                    if (cheatLength > maxCheatTime) { continue }
 
-                for (dirFrom in Direction.entries) {
-                    for (dirTo in Direction.entries) {
-                        if (dirFrom == dirTo) { continue }
-                        val cheatDist = calculateCheat(p + dirFrom, p + dirTo)
-                        if (cheatDist != null) {
-                            val savings = distNoCheating - cheatDist
-                            cheats.merge(savings, 1) { v1, v2 -> v1 + v2}
-                        }
+                    val cheatDist = calculateCheat(p1, p2)
+                    if (cheatDist != null) {
+                        val savings = distNoCheating - cheatDist
+                        cheats.merge(savings, 1) { v1, v2 -> v1 + v2}
                     }
                 }
             }
@@ -106,9 +108,14 @@ object Y2024D20 : Solution {
 
     override fun partOne(input: String): Int {
         val grid = parseInput(input)
-        val cheats = grid.getCheats()
+        val cheats = grid.getCheats(2)
         return cheats.entries.filter { (k, v) -> k >= 100}.sumOf { (k, v) -> v}.also { println(it) }
     }
 
-//    override fun partTwo(input: String) = input.length
+    override fun partTwo(input: String): Int {
+        val grid = parseInput(input)
+        val cheats = grid.getCheats(20)
+        return cheats.entries.filter { (k, v) -> k >= 100}.sumOf { (k, v) -> v}.also { println(it) }
+    }
+
 }
