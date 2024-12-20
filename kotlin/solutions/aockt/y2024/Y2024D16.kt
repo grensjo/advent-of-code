@@ -1,7 +1,7 @@
 package aockt.y2024
 
 import io.github.jadarma.aockt.core.Solution
-import java.lang.AssertionError
+import java.util.Deque
 import java.util.PriorityQueue
 
 private data class Point(val i: Int, val j: Int) {
@@ -56,7 +56,10 @@ private data class Grid(val h: Int, val w: Int, val grid: List<List<Char>>) {
                 }
             }
         }
+}
 
+private data class StepInfo(val state: ReindeerState, val costToHere: Long) {
+    val previousState: MutableSet<ReindeerState> = mutableSetOf()
 }
 
 object Y2024D16 : Solution {
@@ -68,32 +71,70 @@ object Y2024D16 : Solution {
         return Grid(h, w, input.lines().map { line -> line.toList() })
     }
 
-    private fun Grid.dijkstra(): Long {
-        val priorityQueue: PriorityQueue<Pair<ReindeerState, Long>> =
-            PriorityQueue(Comparator.comparingLong { it.second })
-        val costs: MutableMap<ReindeerState, Long> = mutableMapOf()
-        priorityQueue.add(startState to 0L)
+    private fun Grid.dijkstra(): Pair<Long, Map<ReindeerState, StepInfo>> {
+        val priorityQueue: PriorityQueue<StepInfo> =
+            PriorityQueue(Comparator.comparingLong { it.costToHere })
+        val costs: MutableMap<ReindeerState, StepInfo> = mutableMapOf()
+        priorityQueue.add(StepInfo(startState, 0))
+        var bestCostToEnd = Long.MAX_VALUE
 
         while (priorityQueue.isNotEmpty()) {
-            val (currentState, currentCost) = priorityQueue.poll()
-            if (currentState in costs) { continue }
-            if (this[currentState.pos] == '#') { continue }
-            costs[currentState] = currentCost
-            if (this[currentState.pos] == 'E') { return currentCost }
+            val currentStep = priorityQueue.poll()
+            if (this[currentStep.state.pos] == '#') { continue }
+            if (currentStep.state in costs) {
+                if(currentStep.costToHere > costs[currentStep.state]!!.costToHere) {
+                    continue
+                } else if (currentStep.costToHere == costs[currentStep.state]!!.costToHere) {
+                    costs[currentStep.state]!!.previousState.addAll(currentStep.previousState)
+                } else {
+                    throw AssertionError("got to too high cost")
+                }
+            } else {
+                costs[currentStep.state] = currentStep
+            }
+            if (this[currentStep.state.pos] == 'E') {
+                if (bestCostToEnd > currentStep.costToHere) {
+                    bestCostToEnd = currentStep.costToHere
+                }
+                continue
+            }
 
-            for ((nextState, nextCost) in currentState.neighboursToCost) {
+            for ((nextState, nextCost) in currentStep.state.neighboursToCost) {
                 if (this[nextState.pos] == '#') { continue }
                 if (nextState in costs) { continue }
-                priorityQueue.add(nextState to (currentCost + nextCost))
+                val nextStepInfo = StepInfo(nextState, currentStep.costToHere + nextCost)
+                nextStepInfo.previousState.add(currentStep.state)
+                priorityQueue.add(nextStepInfo)
             }
         }
-        throw AssertionError("No path to goal.")
+
+        return bestCostToEnd to costs
     }
 
     override fun partOne(input: String): Long {
         val grid = parseInput(input)
-        return grid.dijkstra().also { println(it) }
+        return grid.dijkstra().first.also { println(it) }
     }
 
-//    override fun partTwo(input: String) = input.length
+   override fun partTwo(input: String): Int {
+       val grid = parseInput(input)
+       val (bestCost, stepInfos) = grid.dijkstra()
+       val queue: ArrayDeque<ReindeerState> = ArrayDeque()
+       queue.addAll(
+           grid.getAllCoords().filter { grid[it] == 'E' }
+               .flatMap { pos -> Direction.entries.map { dir -> ReindeerState(pos, dir) } }
+               .filter { stepInfos[it]?.costToHere == bestCost })
+
+       val statesOnBestPath: MutableSet<ReindeerState> = mutableSetOf()
+
+       while (queue.isNotEmpty()) {
+           val currentState = queue.removeFirst()
+           if (currentState in statesOnBestPath) continue
+
+           statesOnBestPath.add(currentState)
+           queue.addAll(stepInfos[currentState]!!.previousState)
+       }
+
+       return statesOnBestPath.map { it.pos }.distinct().count().also { println(it) }
+   }
 }

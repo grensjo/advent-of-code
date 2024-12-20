@@ -48,10 +48,9 @@ class Y2024D16Test : AdventSpec<Y2024D16>({
         exampleInput2 shouldOutput 11048
     }
 
-//    partTwo {
-//        """
-//            a
-//        """.trimIndent() shouldOutput 1
-//    }
+   partTwo {
+       exampleInput1 shouldOutput 45
+       exampleInput2 shouldOutput 64
+   }
 
 })
