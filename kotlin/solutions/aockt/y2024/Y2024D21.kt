@@ -7,6 +7,8 @@ object Y2024D21 : Solution {
     private data class Point(val i: Int, val j: Int) {
         fun next(d: Direction) = Point(i + d.di, j + d.dj)
         operator fun plus(d: Direction) = next(d)
+        operator fun plus(p: Point) = Point(i + p.i, j + p.j)
+        operator fun minus(p: Point) = Point(i - p.i, j - p.j)
     }
 
     private enum class Direction(val di: Int, val dj: Int) {
@@ -32,6 +34,54 @@ object Y2024D21 : Solution {
 
         operator fun get(p: Point): Char? {
             return grid.getOrNull(p.i)?.getOrNull(p.j)
+        }
+
+        fun getPath(from: Char, to: Char): String {
+            val p1 = getAllCoords().first { this@Grid[it] == from }
+            val p2 = getAllCoords().first { this@Grid[it] == to }
+            val diff = p2 - p1
+
+            return buildString {
+                val horizontal = if (diff.j > 0) {
+                    buildString { for (n in 1..diff.j) { append('>') } }
+                } else if (diff.j < 0) {
+                    buildString { for (n in 1..-diff.j) { append('<') } }
+                } else {
+                    ""
+                }
+                val vertical = if (diff.i > 0) {
+                    buildString { for (n in 1..diff.i) { append('v') } }
+                } else if (diff.i < 0) {
+                    buildString { for (n in 1..-diff.i) { append('^') } }
+                } else {
+                    ""
+                }
+
+                if (this@Grid[p1 + Point(diff.i, 0)] == '#') {
+                    // Starting vertically would make us point at the invalid cell for a second.
+                    append(horizontal)
+                    append(vertical)
+                } else if (this@Grid[p1 + Point(0, diff.j)] == '#') {
+                    // Starting horizontally would make us point at the invalid cell for a second.
+                    append(vertical)
+                    append(horizontal)
+                } else if (diff.i < 0 && diff.j < 0) {
+                    append(horizontal)
+                    append(vertical)
+                } else if (diff.i > 0 && diff.j > 0) {
+                    append(vertical)
+                    append(horizontal)
+                } else if (diff.i > 0 && diff.j < 0) {
+                    append(horizontal)
+                    append(vertical)
+                } else {
+                    append(vertical)
+                    append(horizontal)
+                }
+
+                append('A')
+            }
+
         }
 
         fun next(current: Char, instruction: Char): Char? {
@@ -74,77 +124,65 @@ object Y2024D21 : Solution {
         #0A
     """.trimIndent().toGrid()
 
-    // Initial state: (A, A, A, 0)
-    // Finished state: (A, A, A, 4)
-    data class State(val dirRobots: List<Char>, val numRobot: Char, val codePos: Int) {
-        fun next(humanInstruction: Char, code: String): State? {
-            val newDirRobots = dirRobots.toMutableList()
-            var newNumRobot = numRobot
-            var newCodePos = codePos
+    private fun generateInstructions(code: String, keypad: Grid): String {
+        var prev = 'A'
+        var str = ""
 
-            fun recurse(instruction: Char, robotIdx: Int): Boolean {
-                if (robotIdx < dirRobots.size) {
-                    // We're at a directional keypad robot
-                    if (instruction == 'A') {
-                        return recurse(dirRobots[robotIdx], robotIdx + 1)
-                    } else {
-                        val newRobotCh = dirKeypad.next(dirRobots[robotIdx], instruction) ?: return false
-                        newDirRobots[robotIdx] = newRobotCh
-                        return true
-                    }
-                } else {
-                    // We're at the numerical keypad robot
-                    if (instruction == 'A') {
-                        val nextCodeChar = numRobot
-                        // Is the character correct?
-                        if (code[codePos] == nextCodeChar) {
-                            newCodePos++
-                            return true
-                        } else {
-                            return false
-                        }
-                    } else {
-                        val newNumRobotCh = numKeypad.next(numRobot, instruction) ?: return false
-                        newNumRobot = newNumRobotCh
-                        return true
-                    }
-                }
-            }
-
-            if(!recurse(humanInstruction, 0)) { return null }
-
-            return State(newDirRobots, newNumRobot, newCodePos)
+        println(code)
+        for (ch in code) {
+            str += keypad.getPath(prev, ch)
+            prev = ch
         }
+
+        println(str.length.toString() + ": " + str)
+
+        return str
     }
 
-    fun solve(code: String, numDirRobots: Int): Int {
-        val startState = State(List(numDirRobots) {_ -> 'A'}, 'A', 0)
-        val endState = State(List(numDirRobots) {_ -> 'A'}, 'A', code.length)
+    data class DpState(val from: Char, val to: Char, val depth: Int)
+    val cache: MutableMap<DpState, Long> = mutableMapOf()
 
-        val visited: MutableSet<State> = mutableSetOf()
-        val queue: ArrayDeque<Pair<State, Int>> = ArrayDeque()
-        queue.add(startState to 0)
-
-        while(queue.isNotEmpty()) {
-            val (currentState, currentCost) = queue.removeFirst()
-            if (currentState == endState) { return currentCost }
-            if (currentState in visited) { continue }
-            visited.add(currentState)
-
-            for (instruction in listOf('^', '<', 'v', '>', 'A')) {
-                val nextState = currentState.next(instruction, code) ?: continue
-                if (nextState in visited) { continue }
-                queue.add(nextState to currentCost + 1)
+    private fun solve(code: String, numRobots: Int): Long {
+        fun dp(from: Char, to: Char, depth: Int): Long {
+            val params = DpState(from, to, depth)
+            if (params in cache) {
+                return cache[params]!!
             }
+
+            val keypad = if (depth == numRobots) { numKeypad } else { dirKeypad }
+
+            var sum = 0L
+            val str = keypad.getPath(from, to)
+
+            if (depth == 0) {
+                return str.length.toLong()
+            }
+
+            var prev = 'A'
+            for (ch in str) {
+                sum += dp(prev, ch, depth - 1)
+                prev = ch
+            }
+            return sum.also { cache[params] = it }
         }
 
-        return Int.MAX_VALUE
+        var prev = 'A'
+        var sum = 0L
+        for (ch in code) {
+            sum += dp(prev, ch, numRobots)
+            prev = ch
+        }
+        return sum
     }
 
     override fun partOne(input: String): Long {
         var sum = 0L
         for (code in input.lines()) {
-            sum += solve(code, 2).toLong() * (code.dropLast(1).toLong())
+//            val robot1 = generateInstructions(code, numKeypad)
+//            val robot2 = generateInstructions(robot1, dirKeypad)
+//            val human = generateInstructions(robot2, dirKeypad)
+            val dpResult = solve(code, 2)
+            sum += dpResult * (code.dropLast(1).toLong())
         }
         return sum.also { println(it) }
     }
@@ -152,8 +190,8 @@ object Y2024D21 : Solution {
     override fun partTwo(input: String): Long {
         var sum = 0L
         for (code in input.lines()) {
-            // Too many states... Need to figure out something better.
-            sum += solve(code, 25).toLong() * (code.dropLast(1).toLong())
+            val dpResult = solve(code, 25)
+            sum += dpResult * (code.dropLast(1).toLong())
         }
         return sum.also { println(it) }
     }
