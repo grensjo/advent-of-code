@@ -1,40 +1,26 @@
 package aockt.y2024
 
-import aockt.y2024.Y2024D21.Direction.*
 import io.github.jadarma.aockt.core.Solution
 
 object Y2024D21 : Solution {
     private data class Point(val i: Int, val j: Int) {
-        fun next(d: Direction) = Point(i + d.di, j + d.dj)
-        operator fun plus(d: Direction) = next(d)
         operator fun plus(p: Point) = Point(i + p.i, j + p.j)
         operator fun minus(p: Point) = Point(i - p.i, j - p.j)
     }
 
-    private enum class Direction(val di: Int, val dj: Int) {
-        NORTH(-1, 0),
-        EAST(0, 1),
-        SOUTH(1, 0),
-        WEST(0, -1),
-    }
-
-    private val directions: Map<Char, Direction> = mapOf(
-        '^' to NORTH,
-        '>' to EAST,
-        'v' to SOUTH,
-        '<' to WEST,
-    )
-
     private class Grid(val h: Int, val w: Int, val grid: List<List<Char>>) {
-        val index: Map<Char, Point> = buildMap {
-            for (p in getAllCoords()) {
-                put(this@Grid[p]!!, p)
-            }
-        }
-
         operator fun get(p: Point): Char? {
             return grid.getOrNull(p.i)?.getOrNull(p.j)
         }
+
+        fun getAllCoords(): List<Point> =
+            buildList {
+                for (i in 0..<h) {
+                    for (j in 0..<w) {
+                        add(Point(i, j))
+                    }
+                }
+            }
 
         fun getPath(from: Char, to: Char): String {
             val p1 = getAllCoords().first { this@Grid[it] == from }
@@ -65,13 +51,9 @@ object Y2024D21 : Solution {
                     // Starting horizontally would make us point at the invalid cell for a second.
                     append(vertical)
                     append(horizontal)
-                } else if (diff.i < 0 && diff.j < 0) {
-                    append(horizontal)
-                    append(vertical)
-                } else if (diff.i > 0 && diff.j > 0) {
-                    append(vertical)
-                    append(horizontal)
-                } else if (diff.i > 0 && diff.j < 0) {
+                } else if (diff.j < 0) {
+                    // Prioritize going to '<' first, since that requires two left pushes from the parent robot, which
+                    // are expensive if they are not done in succession.
                     append(horizontal)
                     append(vertical)
                 } else {
@@ -83,27 +65,8 @@ object Y2024D21 : Solution {
             }
 
         }
-
-        fun next(current: Char, instruction: Char): Char? {
-            val currentPoint = index[current]!!
-            val nextPoint = currentPoint + directions[instruction]!!
-            val nextChar = this[nextPoint]
-            return when (this[nextPoint]) {
-                null -> null
-                '#' -> null
-                else -> nextChar
-            }
-        }
-
-        fun getAllCoords(): List<Point> =
-            buildList {
-                for (i in 0..<h) {
-                    for (j in 0..<w) {
-                        add(Point(i, j))
-                    }
-                }
-            }
     }
+
     private fun String.toGrid(): Grid {
         val lines = lines()
         val h = lines.size
@@ -124,48 +87,43 @@ object Y2024D21 : Solution {
         #0A
     """.trimIndent().toGrid()
 
-    private fun generateInstructions(code: String, keypad: Grid): String {
-        var prev = 'A'
-        var str = ""
+    private data class DpState(val from: Char, val to: Char, val depth: Int)
+    private val cache: MutableMap<DpState, Long> = mutableMapOf()
 
-        println(code)
-        for (ch in code) {
-            str += keypad.getPath(prev, ch)
-            prev = ch
-        }
-
-        println(str.length.toString() + ": " + str)
-
-        return str
-    }
-
-    data class DpState(val from: Char, val to: Char, val depth: Int)
-    val cache: MutableMap<DpState, Long> = mutableMapOf()
-
-    private fun solve(code: String, numRobots: Int): Long {
+    private fun solveTestcase(code: String, numRobots: Int): Long {
         fun dp(from: Char, to: Char, depth: Int): Long {
-            val params = DpState(from, to, depth)
-            if (params in cache) {
-                return cache[params]!!
+            val dpState = DpState(from, to, depth)
+            if (dpState in cache) {
+                return cache[dpState]!!
             }
 
-            val keypad = if (depth == numRobots) { numKeypad } else { dirKeypad }
+            val keypad = if (depth == numRobots) {
+                // We're at the first robot, computing paths on the numerical keypad.
+                numKeypad
+            } else {
+                // We're at a subsequent robot (or the last human), computing paths on a directional keypad.
+                dirKeypad
+            }
 
             var sum = 0L
             val str = keypad.getPath(from, to)
 
             if (depth == 0) {
+                // We're at the human, pressing buttons in constant time.
                 return str.length.toLong()
             }
 
             var prev = 'A'
             for (ch in str) {
+                // Compute cost for parent robot to move us to the next character.
                 sum += dp(prev, ch, depth - 1)
                 prev = ch
             }
-            return sum.also { cache[params] = it }
+
+            return sum.also { cache[dpState] = it }
         }
 
+        // Go through the given numerical code and compute the recursive cost for each button press.
         var prev = 'A'
         var sum = 0L
         for (ch in code) {
@@ -175,24 +133,14 @@ object Y2024D21 : Solution {
         return sum
     }
 
-    override fun partOne(input: String): Long {
+    private fun solveAndComputeSum(input: String, numRobots: Int): Long {
         var sum = 0L
         for (code in input.lines()) {
-//            val robot1 = generateInstructions(code, numKeypad)
-//            val robot2 = generateInstructions(robot1, dirKeypad)
-//            val human = generateInstructions(robot2, dirKeypad)
-            val dpResult = solve(code, 2)
-            sum += dpResult * (code.dropLast(1).toLong())
+            sum += solveTestcase(code, numRobots) * (code.dropLast(1).toLong())
         }
         return sum.also { println(it) }
     }
 
-    override fun partTwo(input: String): Long {
-        var sum = 0L
-        for (code in input.lines()) {
-            val dpResult = solve(code, 25)
-            sum += dpResult * (code.dropLast(1).toLong())
-        }
-        return sum.also { println(it) }
-    }
+    override fun partOne(input: String) = solveAndComputeSum(input, 2)
+    override fun partTwo(input: String) = solveAndComputeSum(input, 25)
 }
