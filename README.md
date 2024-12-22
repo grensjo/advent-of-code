@@ -2,7 +2,7 @@
 ## Problems
 
 <details open>
-    <summary>2024 - 16 x ⭐</summary>
+    <summary>2024 - 44 x ⭐</summary>
 
 | Day |                             Title                              | Python |                        Kotlin                        | Stars |
 |:---:|:--------------------------------------------------------------:|:------:|:----------------------------------------------------:|:-----:|
@@ -27,6 +27,7 @@
 | 19  |      [Linen Layout](https://adventofcode.com/2024/day/19)      |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D19.kt) |  ⭐⭐   |
 | 20  |     [Race Condition](https://adventofcode.com/2024/day/20)     |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D20.kt) |  ⭐⭐   |
 | 21  |    [Keypad Conundrum](https://adventofcode.com/2024/day/21)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D21.kt) |  ⭐⭐   |
+| 22  |     [Monkey Market](https://adventofcode.com/2024/day/22)      |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D22.kt) |  ⭐⭐   |
 
 </details>
 
