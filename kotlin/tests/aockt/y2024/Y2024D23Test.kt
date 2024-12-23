@@ -44,10 +44,8 @@ class Y2024D23Test : AdventSpec<Y2024D23>({
         exampleInput shouldOutput 7
     }
 
-//    partTwo {
-//        """
-//            a
-//        """.trimIndent() shouldOutput 1
-//    }
+    partTwo {
+        exampleInput shouldOutput "co,de,ka,ta"
+    }
 
 })

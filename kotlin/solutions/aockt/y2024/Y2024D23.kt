@@ -3,46 +3,51 @@ package aockt.y2024
 import io.github.jadarma.aockt.core.Solution
 
 object Y2024D23 : Solution {
-    private fun parseInput(input: String): List<Pair<String, String>> =
-        input.lines().map { it.split('-') }.map { it[0] to it[1] }
-
-    private fun getMapToIds(stringIds: List<String>): Map<String, Int> {
-        val map: MutableMap<String, Int> = mutableMapOf()
-        stringIds.distinct().sorted().withIndex().forEach { (i, str) -> map[str] = i }
-        return map
+    private data class Graph(val nodes: List<String>, val edges: Set<Pair<String, String>>) {
+        fun hasEdge(u: String, v: String) = u to v in edges || v to u in edges
     }
 
-    val cache: MutableMap<Pair<Int, Int>, Long> = mutableMapOf()
-    private fun choose(n: Int, k: Int): Long = cache.getOrPut(n to k) {
-            if (n == k || k == 0) {
-                1
-            } else {
-                choose(n-1, k-1) + choose(n - 1, k)
-            }
-        }
-
-    private fun solve(input: String): Int {
-        val edges = parseInput(input).toSet()
+    private fun parseInput(input: String): Graph {
+        val edges = input.lines().map { it.split('-') }.map { it[0] to it[1] }.toSet()
         val nodes = edges.flatMap { listOf(it.first, it.second) }.distinct()
+        return Graph(nodes, edges)
+    }
+
+    private fun extendCliques(g: Graph, oldCliques: Set<List<String>>): Set<List<String>> {
         val cliques: MutableSet<List<String>> = mutableSetOf()
-
-        println("nodes: ${nodes.size}, edges: ${edges.size}")
-
-        for ((u, v) in edges.filter { it.first[0] == 't' || it.second[0] == 't' }) {
-            for (w in nodes.filterNot { it == u || it == v } ) {
-                if (
-                    (u to w in edges || w to u in edges) &&
-                    ((v to w in edges || w to v in edges))
-                ) {
-                    cliques.add(listOf(u, v, w).sorted())
+        for (c1 in oldCliques) {
+            for (node in g.nodes) {
+                if (node in c1) { continue }
+                if (c1.all { g.hasEdge(it, node) }) {
+                    cliques.add(c1.plus(node).sorted())
                 }
             }
         }
-
-        return cliques.size.also { println(it) }
+        return cliques
     }
 
-    override fun partOne(input: String) = solve(input)
+    override fun partOne(input: String): Int {
+        val g: Graph = parseInput(input)
+        return extendCliques(
+            g, g.edges.map { listOf(it.first, it.second) }.toSet())
+            .size.also { println(it) }
+    }
 
-//    override fun partTwo(input: String) = input.length
+    override fun partTwo(input: String): String {
+        val g = parseInput(input)
+        var prevCliques = g.edges.map { listOf(it.first, it.second) }.toSet()
+
+        for (n in 3..g.nodes.size) {
+            val newCliques = extendCliques(g, prevCliques)
+            prevCliques = newCliques
+
+            println("Number of $n-cliques: ${newCliques.size}")
+
+            if (prevCliques.size == 1) {
+                break
+            }
+        }
+
+        return prevCliques.first().joinToString(separator = ",").also { println(it) }
+    }
 }
