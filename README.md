@@ -2,7 +2,7 @@
 ## Problems
 
 <details open>
-    <summary>2024 - 44 x ⭐</summary>
+    <summary>2024 - 50 x ⭐</summary>
 
 | Day |                             Title                              | Python |                        Kotlin                        | Stars |
 |:---:|:--------------------------------------------------------------:|:------:|:----------------------------------------------------:|:-----:|
@@ -28,6 +28,9 @@
 | 20  |     [Race Condition](https://adventofcode.com/2024/day/20)     |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D20.kt) |  ⭐⭐   |
 | 21  |    [Keypad Conundrum](https://adventofcode.com/2024/day/21)    |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D21.kt) |  ⭐⭐   |
 | 22  |     [Monkey Market](https://adventofcode.com/2024/day/22)      |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D22.kt) |  ⭐⭐   |
+| 23  |       [LAN Party](https://adventofcode.com/2024/day/23)        |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D23.kt) |  ⭐⭐   |
+| 24  |     [Crossed Wires](https://adventofcode.com/2024/day/24)      |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D24.kt) |  ⭐⭐   |
+| 25  |     [Code Chronicle](https://adventofcode.com/2024/day/25)     |  n/a   | [Solution](kotlin/solutions/aockt/y2024/Y2024D25.kt) |  ⭐⭐   |
 
 </details>
 
